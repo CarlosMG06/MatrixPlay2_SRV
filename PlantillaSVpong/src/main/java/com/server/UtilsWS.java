@@ -1,4 +1,4 @@
-package com.client;
+package com.server;
 
 import java.net.URI;
 import java.net.URISyntaxException;

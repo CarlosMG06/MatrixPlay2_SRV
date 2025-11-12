@@ -1,25 +1,6 @@
-/home/super/Documents/GitHub/Conecta4-Bargados-Denis/Conecta 4/src/main/java/com/server/CrearClientHandler.java
-/home/super/Documents/GitHub/Conecta4-Bargados-Denis/Conecta 4/src/main/java/com/client/Main.java
-/home/super/Documents/GitHub/Conecta4-Bargados-Denis/Conecta 4/src/main/java/com/client/Controllers/CtrlWait.java
-/home/super/Documents/GitHub/Conecta4-Bargados-Denis/Conecta 4/src/main/java/com/client/UtilsViews.java
-/home/super/Documents/GitHub/Conecta4-Bargados-Denis/Conecta 4/src/main/java/com/server/InvitacioHandler.java
-/home/super/Documents/GitHub/Conecta4-Bargados-Denis/Conecta 4/src/main/java/com/client/Controllers/CtrlPlay.java
-/home/super/Documents/GitHub/Conecta4-Bargados-Denis/Conecta 4/src/main/java/com/server/GameHandler.java
-/home/super/Documents/GitHub/Conecta4-Bargados-Denis/Conecta 4/src/main/java/com/server/Missatges.java
-/home/super/Documents/GitHub/Conecta4-Bargados-Denis/Conecta 4/src/main/java/com/client/Controllers/CtrlConfig.java
-/home/super/Documents/GitHub/Conecta4-Bargados-Denis/Conecta 4/src/main/java/com/shared/Utils.java
-/home/super/Documents/GitHub/Conecta4-Bargados-Denis/Conecta 4/src/main/java/com/shared/ClientPerfil.java
-/home/super/Documents/GitHub/Conecta4-Bargados-Denis/Conecta 4/src/main/java/com/client/PlayGrid.java
-/home/super/Documents/GitHub/Conecta4-Bargados-Denis/Conecta 4/src/main/java/com/client/Gestio/GestorAnimacio.java
-/home/super/Documents/GitHub/Conecta4-Bargados-Denis/Conecta 4/src/main/java/com/client/Gestio/GestorMouse.java
-/home/super/Documents/GitHub/Conecta4-Bargados-Denis/Conecta 4/src/main/java/com/server/Main.java
-/home/super/Documents/GitHub/Conecta4-Bargados-Denis/Conecta 4/src/main/java/com/server/ServerUtils.java
-/home/super/Documents/GitHub/Conecta4-Bargados-Denis/Conecta 4/src/main/java/com/shared/ClientData.java
-/home/super/Documents/GitHub/Conecta4-Bargados-Denis/Conecta 4/src/main/java/com/client/UtilsWS.java
-/home/super/Documents/GitHub/Conecta4-Bargados-Denis/Conecta 4/src/main/java/com/client/PlayTimer.java
-/home/super/Documents/GitHub/Conecta4-Bargados-Denis/Conecta 4/src/main/java/com/shared/GameObject.java
-/home/super/Documents/GitHub/Conecta4-Bargados-Denis/Conecta 4/src/main/java/com/client/Controllers/CtrlInvitacions.java
-/home/super/Documents/GitHub/Conecta4-Bargados-Denis/Conecta 4/src/main/java/com/client/Gestio/GestioMissatges.java
-/home/super/Documents/GitHub/Conecta4-Bargados-Denis/Conecta 4/src/main/java/com/shared/Partida.java
-/home/super/Documents/GitHub/Conecta4-Bargados-Denis/Conecta 4/src/main/java/com/server/ClientRegistry.java
-/home/super/Documents/GitHub/Conecta4-Bargados-Denis/Conecta 4/src/main/java/com/client/Gestio/GestioTauler.java
+C:\Users\Denis\Documents\GitHub\MatrixPlay2_SRV\PlantillaSVpong\src\main\java\com\server\ClientRegistry.java
+C:\Users\Denis\Documents\GitHub\MatrixPlay2_SRV\PlantillaSVpong\src\main\java\com\server\GameObject.java
+C:\Users\Denis\Documents\GitHub\MatrixPlay2_SRV\PlantillaSVpong\src\main\java\com\server\UtilsWS.java
+C:\Users\Denis\Documents\GitHub\MatrixPlay2_SRV\PlantillaSVpong\src\main\java\com\server\Missatges.java
+C:\Users\Denis\Documents\GitHub\MatrixPlay2_SRV\PlantillaSVpong\src\main\java\com\server\Main.java
+C:\Users\Denis\Documents\GitHub\MatrixPlay2_SRV\PlantillaSVpong\src\main\java\com\server\ClientData.java
