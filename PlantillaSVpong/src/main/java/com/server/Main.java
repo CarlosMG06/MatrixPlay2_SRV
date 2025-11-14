@@ -4,17 +4,20 @@ import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Map;
 
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
+import org.java_websocket.exceptions.WebsocketNotConnectedException;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class Main extends WebSocketServer {
 
     private final ClientRegistry clients;
     private static final List<String> PLAYER_NAMES = Arrays.asList(
-        "Bulbasaur", "Charizard", "Blaziken", "Umbreon", "Mewtwo", "Pikachu", "Wartortle"
+            "Bulbasaur", "Charizard", "Blaziken", "Umbreon", "Mewtwo", "Pikachu", "Wartortle"
     );
 
     public static final int DEFAULT_PORT = 3000;
@@ -26,24 +29,24 @@ public class Main extends WebSocketServer {
 
     @Override
     public void onOpen(WebSocket conn, ClientHandshake handshake) {
-        // Asignar un nombre aleatorio del pool
+        // Asignar un nombre del pool
         String name = clients.add(conn, "Player" + (int)(Math.random() * 1000));
         System.out.println("Cliente conectado: " + name);
-
-        // Enviar broadcast de bienvenida a todos los clientes
-        broadcastText("Hola a todos!", 5000);
+        sendClientsListToAll();
+        broadcastText("Bienvenido " + name + "!", 5000);
     }
 
     @Override
     public void onClose(WebSocket conn, int code, String reason, boolean remote) {
         String name = clients.remove(conn);
         System.out.println("Cliente desconectado: " + name);
+        sendClientsListToAll();
     }
 
     @Override
     public void onMessage(WebSocket conn, String message) {
-        System.out.println("Mensaje recibido: " + message);
-        // interpretar mensajes del Pong, por ejemplo "move" o "shoot"
+        // Aquí procesarás mensajes del Pong, por ejemplo: movimiento o power-ups
+        System.out.println("Mensaje recibido de " + clients.nameBySocket(conn) + ": " + message);
     }
 
     @Override
@@ -63,51 +66,39 @@ public class Main extends WebSocketServer {
         System.out.println("Servidor corriendo en puerto " + DEFAULT_PORT + ". Ctrl+C para detener.");
     }
 
-    // ===================== NUEVAS FUNCIONES PARA RPI =====================
+    // ===================== FUNCIONES PARA CLIENTES =====================
 
-    /**
-     * Envia un mensaje de texto a todos los clientes conectados (broadcast)
-     * Compatible con el cliente RPi
-     */
+    /** Envía mensaje de texto a todos los clientes */
     public void broadcastText(String message, long ttl_ms) {
         JSONObject o = new JSONObject();
         o.put("type", "text");
         o.put("message", message);
         o.put("ttl_ms", ttl_ms);
-
-        broadcast(o.toString());
+        broadcastSafe(o.toString());
     }
 
-    /**
-     * Envia una imagen (en bytes) a todos los clientes conectados
-     * Compatible con el cliente RPi
-     */
+    /** Envía imagen a todos los clientes (Base64) */
     public void broadcastImage(byte[] imageBytes, long ttl_ms, String name) {
         JSONObject o = new JSONObject();
         o.put("type", "image");
         o.put("b64", Base64.getEncoder().encodeToString(imageBytes));
         o.put("ttl_ms", ttl_ms);
         o.put("name", name);
-
-        broadcast(o.toString());
+        broadcastSafe(o.toString());
     }
 
-    /**
-     * Enviar mensaje de texto solo a un cliente específico
-     */
+    /** Envía mensaje solo a un cliente */
     public void sendText(WebSocket conn, String message, long ttl_ms) {
         if (conn != null && conn.isOpen()) {
             JSONObject o = new JSONObject();
             o.put("type", "text");
             o.put("message", message);
             o.put("ttl_ms", ttl_ms);
-            conn.send(o.toString());
+            sendSafe(conn, o.toString());
         }
     }
 
-    /**
-     * Enviar imagen solo a un cliente específico
-     */
+    /** Envía imagen solo a un cliente */
     public void sendImage(WebSocket conn, byte[] imageBytes, long ttl_ms, String name) {
         if (conn != null && conn.isOpen()) {
             JSONObject o = new JSONObject();
@@ -115,7 +106,39 @@ public class Main extends WebSocketServer {
             o.put("b64", Base64.getEncoder().encodeToString(imageBytes));
             o.put("ttl_ms", ttl_ms);
             o.put("name", name);
-            conn.send(o.toString());
+            sendSafe(conn, o.toString());
+        }
+    }
+
+    /** Envía la lista de clientes a todos */
+    public void sendClientsListToAll() {
+        JSONArray list = clients.currentNames();
+        for (Map.Entry<WebSocket, String> e : clients.snapshot().entrySet()) {
+            JSONObject msg = new JSONObject();
+            msg.put("type", "clients");
+            msg.put("id", e.getValue());
+            msg.put("list", list);
+            sendSafe(e.getKey(), msg.toString());
+        }
+    }
+
+    /** Envía de manera segura a un cliente (maneja desconexiones) */
+    private void sendSafe(WebSocket to, String payload) {
+        if (to == null) return;
+        try {
+            to.send(payload);
+        } catch (WebsocketNotConnectedException e) {
+            String name = clients.cleanupDisconnected(to);
+            System.out.println("Cliente desconectado durante send: " + name);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /** Broadcast seguro para todos los clientes */
+    private void broadcastSafe(String payload) {
+        for (Map.Entry<WebSocket, String> e : clients.snapshot().entrySet()) {
+            sendSafe(e.getKey(), payload);
         }
     }
 }
