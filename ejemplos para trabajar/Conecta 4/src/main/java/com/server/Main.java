@@ -56,7 +56,7 @@ public class Main extends WebSocketServer {
 
     /** Registre de clients i assignació de noms (pool integrat). */
     private final ClientRegistry clients;
-    private final InvitacioHandler invitacioHandler;
+
     private final CrearClientHandler crearClientHandler;
     private final GameHandler jocHandler;
     private final ServerUtils serverUtils;
@@ -85,7 +85,6 @@ public class Main extends WebSocketServer {
         
         serverUtils = new ServerUtils(this, clients, clientsData, perfils, partidas);
         jocHandler = new GameHandler(clientsData, clients, partidas, perfils, this,serverUtils);
-        invitacioHandler = new InvitacioHandler(perfils, clients,this,jocHandler,serverUtils);
 
         crearClientHandler = new CrearClientHandler(perfils, clients, clientsData, this,serverUtils);
 
@@ -278,8 +277,7 @@ public class Main extends WebSocketServer {
                 case Missatges.CLIENT_OBJECT_MOVING -> jocHandler.handleClientObjectMoving(conn, obj,serverUtils.getPartidaByJugador(conn));
                 case Missatges.T_CLIENT_SET_NAME -> crearClientHandler.handleClientSetName(conn, obj);
                 case Missatges.T_COLOCAR_FITXA -> jocHandler.handleColocarFitxa(conn, obj,serverUtils.getPartidaByJugador(conn));
-                case Missatges.T_INVITACIO -> invitacioHandler.handleInvitacion(conn, obj);
-                case Missatges.T_ACCEPT_INVITACIO -> invitacioHandler.handleAcceptInvitation(obj);
+
                 default -> {
 
                 }

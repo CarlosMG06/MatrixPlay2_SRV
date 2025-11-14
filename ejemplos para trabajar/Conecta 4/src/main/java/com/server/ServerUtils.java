@@ -60,10 +60,6 @@ public class ServerUtils {
                 if (cd != null) arrClients.put(cd.toJSON());
             }
 
-            JSONArray arrObjects = new JSONArray();
-            for (GameObject obj : p.gameObjects.values()) {
-                arrObjects.put(obj.toJSON());
-            }
 
             JSONObject gameState = new JSONObject();
             gameState.put("status", p.winnerName.isEmpty() ? "playing" : "finished");
@@ -82,7 +78,6 @@ public class ServerUtils {
                 serverData.put("partidaId", p.id);
                 serverData.put("clientName", name);
                 serverData.put("clientsList", arrClients);
-                serverData.put("objectsList", arrObjects);
                 serverData.put("game", gameState);
                 sendSafe(conn, serverData.toString());
                 

@@ -11,7 +11,6 @@ public class Partida {
     public WebSocket jugador1;
     public WebSocket jugador2;
     public String[][] board = new String[6][7];
-    public Map<String, GameObject> gameObjects = new HashMap<>();
     public int currentPlayer = 1; // 1=rojo, 2=amarillo
     public int lastRow = -1, lastCol = -1;
     public String winnerName = "";
