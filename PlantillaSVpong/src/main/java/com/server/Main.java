@@ -102,18 +102,21 @@ public class Main extends WebSocketServer {
 
 
 
-                //comprueba si el nombre esta disponible
+                //comprueba si el nombre esta usado = true
                 for (int i = 0; i>namesUsed.length();i++){
                         if(clientName.equals(namesUsed.get(i))){
                             used=true;
                         }
                 }
 
-                JSONObject jo = msg(Missatges.CHECK_NAME);
+                //envia si el nombre esta disponible o usado
+
+                JSONObject jo = msg(Missatges.CHECK_NAME_STATUS);
+                
                 if(used){
 
                     jo.put(Missatges.K_VALUE, Missatges.K_NAME_USED);
-                    conn.close();
+                    
 
                 }else{
                     jo.put(Missatges.K_VALUE, Missatges.K_NAME_AVALIBLE);
@@ -121,6 +124,12 @@ public class Main extends WebSocketServer {
                     sendCountdown();
                 }
 
+                
+                sendSafe(conn, jo.toString());
+                
+                //si esta en uso desconecta al usuario
+                if(used){conn.close();}
+        
                 break;
 
 
@@ -254,8 +263,10 @@ public class Main extends WebSocketServer {
     }
 
     /** Envia a tots els clients el compte enrere. */
-    private void sendCountdownToAll(int n) {
-        JSONObject rst = msg(Missatges.COUNTDOWN).put(Missatges.K_VALUE, n);
+    private void sendCountdownToAll(JSONObject jo) {
+
+
+        JSONObject rst = msg(Missatges.COUNTDOWN).put(Missatges.K_VALUE, jo);
         broadcastExcept(null, rst.toString());
     }
 
@@ -298,6 +309,16 @@ public class Main extends WebSocketServer {
 
         new Thread(() -> {
             try {
+                JSONObject jo = new JSONObject();
+                int num = 0;
+                for(String name : clientsData.keySet()){
+                    
+                    if(name.equals("raspberryClient")) { continue;}
+                    jo.put("player"+num, name);
+                }
+
+
+
                 for (int i = 5; i >= 0; i--) {
                     int raspberryCount = 0;
 
@@ -308,8 +329,8 @@ public class Main extends WebSocketServer {
                     if (clients.snapshot().size()-raspberryCount < Missatges.REQUIRED_CLIENTS) {
                         break;
                     }
-
-                    sendCountdownToAll(i);
+                    jo.put("msgCountDown", i);
+                    sendCountdownToAll(jo);
 
                     if (i > 0) Thread.sleep(750); // ritme del compte enrere
                 }

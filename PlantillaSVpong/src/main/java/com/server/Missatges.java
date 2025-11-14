@@ -28,10 +28,15 @@ public class Missatges {
     public static final String K_CLIENTS_LIST = "serverClients";
     public static final String K_GAME_DATA = "serverGameData";
     public static final String K_CLIENT_NAME = "clientName";
+
+
+
     public static final String K_GET_NAME = "getName";
 
-
     public static final String CHECK_NAME = "checkMyName";
+    public static final String CHECK_NAME_STATUS = "checkNameStatus";
+    
+
     public static final String C_NAME = "clientName";
     public static final String K_NAME_AVALIBLE = "NameAvalible";
     public static final String K_NAME_USED = "NameUsed";
