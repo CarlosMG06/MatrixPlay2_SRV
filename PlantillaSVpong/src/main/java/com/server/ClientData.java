@@ -4,28 +4,22 @@ import org.json.JSONObject;
 
 public class ClientData {
     public String name;
-    public String color;
-    public int mouseX;
-    public int mouseY;
-    public int row;
-    public int col;
+    public int player;
+    public int poss;
+    public int points;
 
-    public ClientData(String name, String color) {
+    public ClientData(String name) {
         this.name = name;
-        this.color = color;
-        this.mouseX = -1;
-        this.mouseY = -1;
-        this.row = -1;
-        this.col = -1;
+        this.player = -1;
+        this.poss=-1;
+        this.points = 0;
     }
 
-    public ClientData(String name, String color, int mouseX, int mouseY, int row, int col) {
+    public ClientData(String name, int player, int poss, int points) {
         this.name = name;
-        this.color = color;
-        this.mouseX = mouseX;
-        this.mouseY = mouseY;
-        this.row = row;
-        this.col = col;
+        this.player = player;
+        this.poss=poss;
+        this.points=points;
     }
 
     @Override
@@ -37,24 +31,21 @@ public class ClientData {
     public JSONObject toJSON() {
         JSONObject obj = new JSONObject();
         obj.put("name", name);
-        obj.put("color", color);
-        obj.put("mouseX", mouseX);
-        obj.put("mouseY", mouseY);
-        obj.put("row", row);
-        obj.put("col", col);
+        obj.put("player", player);
+        obj.put("poss", poss);
+        obj.put("points", points);
+
         return obj;
     }
 
     // Crea un ClientData a partir de JSON
     public static ClientData fromJSON(JSONObject obj) {
         String name = obj.optString("name", null);
-        String color = obj.optString("color", null);
 
-        ClientData cd = new ClientData(name, color);
-        cd.mouseX = obj.optInt("mouseX", -1);
-        cd.mouseY = obj.optInt("mouseY", -1);
-        cd.row = obj.optInt("row", -1);
-        cd.col = obj.optInt("col", -1);
+        ClientData cd = new ClientData(name);
+        cd.player = obj.optInt("player", -1);
+        cd.poss = obj.optInt("poss", -1);
+        cd.points = obj.optInt("points", -1);
         return cd;
     }
 }
