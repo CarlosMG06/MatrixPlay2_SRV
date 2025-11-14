@@ -6,7 +6,6 @@ import org.json.JSONObject;
 
 import com.shared.ClientData;
 import com.shared.ClientPerfil;
-import com.shared.GameObject;
 import com.shared.Partida;
 
 import java.util.List;
@@ -86,118 +85,73 @@ public class GameHandler {
         clientsData.put(clientName, ClientData.fromJSON(obj.getJSONObject(Missatges.K_VALUE)));
     }
 
-    public void handlePeticioSelect(WebSocket conn, JSONObject obj, Partida partida) {
-        if (partida == null) return;
 
-        JSONObject value = obj.getJSONObject(Missatges.K_VALUE);
-        GameObject objData = GameObject.fromJSON(value);
-        String jugadorColor = clientsData.get(clients.nameBySocket(conn)).color;
-        if (!objData.color.equalsIgnoreCase(jugadorColor)) return;
+    
 
-        String playerColor = obj.getString(Missatges.COLOR);
-        GameObject fitxa = partida.gameObjects.get(objData.id);
-        if (fitxa == null || !fitxa.color.equalsIgnoreCase(playerColor)) return;
+    // public void handleColocarFitxa(WebSocket conn, JSONObject obj, Partida partida) {
+    //     if (partida == null) return;
 
-        boolean correcte = true;
-        int col = objData.col;
-        if (col >= 0 && serverUtils.findLowestEmptyRow(partida.board, col) < 0) correcte = false;
+    //     String nom = obj.getString(Missatges.NAME);
+    //     String color = obj.getString(Missatges.COLOR);
+    //     int col = obj.getInt(Missatges.COL);
+    //     String id = obj.getString(Missatges.ID);
 
-        JSONObject msg = new JSONObject();
-        msg.put(Missatges.K_TYPE, Missatges.PETICIO_RESPOSTA);
-        msg.put(Missatges.ID, objData.id);
-        msg.put(Missatges.CORRECTE, correcte);
-        msg.put(Missatges.K_VALUE, objData.toJSON());
+    //     ClientData jugador = clientsData.get(nom);
+    //     if (jugador == null) return;
 
-        serverUtils.sendSafe(conn, msg.toString());
-    }
+    //     String turnoColor = (partida.currentPlayer == 1) ? Missatges.RED : Missatges.YELLOW;
+    //     if (!jugador.color.equalsIgnoreCase(turnoColor)) return;
 
-    public void handleClientObjectMoving(WebSocket conn, JSONObject obj, Partida partida) {
-        if (partida == null) return;
+    //     GameObject piece = partida.gameObjects.get(id);
+    //     if (piece == null || !piece.isPiece || !piece.color.equalsIgnoreCase(jugador.color)) return;
 
-        JSONObject value = obj.getJSONObject(Missatges.K_VALUE);
-        GameObject objData = GameObject.fromJSON(value);
+    //     int row = serverUtils.findLowestEmptyRow(partida.board, col);
+    //     if (row < 0) return;
 
-        String piezaColor = objData.color.toUpperCase();
-        String turnoColor = (partida.currentPlayer == 1) ? Missatges.RED : Missatges.YELLOW;
-        if (!piezaColor.equalsIgnoreCase(turnoColor)) return;
+    //     String valor = color.equalsIgnoreCase(Missatges.RED) ? "R" : "Y";
+    //     partida.board[row][col] = valor;
+    //     piece.isPiece = false;
 
-        GameObject pieza = partida.gameObjects.get(objData.id);
-        if (pieza == null || !pieza.isPiece) return;
+    //     JSONObject fitxaColocada = new JSONObject();
+    //     fitxaColocada.put(Missatges.K_TYPE, Missatges.FITXA_COLOCADA);
+    //     fitxaColocada.put(Missatges.ROW, row);
+    //     fitxaColocada.put(Missatges.COL, col);
+    //     fitxaColocada.put(Missatges.K_VALUE, valor);
+    //     fitxaColocada.put(Missatges.ID, id);
 
-        partida.gameObjects.put(objData.id, objData);
+    //     serverUtils.sendSafe(partida.jugador1, fitxaColocada.toString());
+    //     serverUtils.sendSafe(partida.jugador2, fitxaColocada.toString());
 
-        JSONObject msg = new JSONObject();
-        msg.put(Missatges.K_TYPE, Missatges.CLIENT_OBJECT_MOVING);
-        msg.put(Missatges.K_VALUE, objData.toJSON());
+    //     partida.lastRow = row;
+    //     partida.lastCol = col;
 
-        serverUtils.sendSafe(partida.jugador1, msg.toString());
-        serverUtils.sendSafe(partida.jugador2, msg.toString());
-    }
+    //     List<int[]> guanyador = serverUtils.comprobarGuanyador(partida.board, row, col, valor);
+    //     if (guanyador != null) {
+    //         if (guanyador.size() == 1 && guanyador.get(0)[0] == -1) {
+    //             partida.winnerName = "EMPAT";
+    //         } else {
+    //             partida.winnerName = nom;
+    //         }
 
-    public void handleColocarFitxa(WebSocket conn, JSONObject obj, Partida partida) {
-        if (partida == null) return;
+    //         JSONObject fiPartida = new JSONObject();
+    //         fiPartida.put(Missatges.K_TYPE, Missatges.PARTIDA_FINALITZADA);
+    //         fiPartida.put("guanyador", partida.winnerName);
+    //         fiPartida.put(Missatges.COLOR, color);
 
-        String nom = obj.getString(Missatges.NAME);
-        String color = obj.getString(Missatges.COLOR);
-        int col = obj.getInt(Missatges.COL);
-        String id = obj.getString(Missatges.ID);
+    //         JSONArray coordsArray = new JSONArray();
+    //         if (!partida.winnerName.equals("EMPAT")) {
+    //             for (int[] pos : guanyador) {
+    //                 coordsArray.put(new JSONArray(pos));
+    //             }
+    //         }
+    //         fiPartida.put(Missatges.WINNING_CELLS, coordsArray);
 
-        ClientData jugador = clientsData.get(nom);
-        if (jugador == null) return;
+    //         serverUtils.sendSafe(partida.jugador1, fiPartida.toString());
+    //         serverUtils.sendSafe(partida.jugador2, fiPartida.toString());
+    //         serverUtils.resetearEstatJugadors(partida);
+    //     }
 
-        String turnoColor = (partida.currentPlayer == 1) ? Missatges.RED : Missatges.YELLOW;
-        if (!jugador.color.equalsIgnoreCase(turnoColor)) return;
-
-        GameObject piece = partida.gameObjects.get(id);
-        if (piece == null || !piece.isPiece || !piece.color.equalsIgnoreCase(jugador.color)) return;
-
-        int row = serverUtils.findLowestEmptyRow(partida.board, col);
-        if (row < 0) return;
-
-        String valor = color.equalsIgnoreCase(Missatges.RED) ? "R" : "Y";
-        partida.board[row][col] = valor;
-        piece.isPiece = false;
-
-        JSONObject fitxaColocada = new JSONObject();
-        fitxaColocada.put(Missatges.K_TYPE, Missatges.FITXA_COLOCADA);
-        fitxaColocada.put(Missatges.ROW, row);
-        fitxaColocada.put(Missatges.COL, col);
-        fitxaColocada.put(Missatges.K_VALUE, valor);
-        fitxaColocada.put(Missatges.ID, id);
-
-        serverUtils.sendSafe(partida.jugador1, fitxaColocada.toString());
-        serverUtils.sendSafe(partida.jugador2, fitxaColocada.toString());
-
-        partida.lastRow = row;
-        partida.lastCol = col;
-
-        List<int[]> guanyador = serverUtils.comprobarGuanyador(partida.board, row, col, valor);
-        if (guanyador != null) {
-            if (guanyador.size() == 1 && guanyador.get(0)[0] == -1) {
-                partida.winnerName = "EMPAT";
-            } else {
-                partida.winnerName = nom;
-            }
-
-            JSONObject fiPartida = new JSONObject();
-            fiPartida.put(Missatges.K_TYPE, Missatges.PARTIDA_FINALITZADA);
-            fiPartida.put("guanyador", partida.winnerName);
-            fiPartida.put(Missatges.COLOR, color);
-
-            JSONArray coordsArray = new JSONArray();
-            if (!partida.winnerName.equals("EMPAT")) {
-                for (int[] pos : guanyador) {
-                    coordsArray.put(new JSONArray(pos));
-                }
-            }
-            fiPartida.put(Missatges.WINNING_CELLS, coordsArray);
-
-            serverUtils.sendSafe(partida.jugador1, fiPartida.toString());
-            serverUtils.sendSafe(partida.jugador2, fiPartida.toString());
-            serverUtils.resetearEstatJugadors(partida);
-        }
-
-        partida.currentPlayer = (partida.currentPlayer == 1) ? 2 : 1;
-        serverUtils.broadcastStatus(partida);
-    }
+    //     partida.currentPlayer = (partida.currentPlayer == 1) ? 2 : 1;
+    //     serverUtils.broadcastStatus(partida);
+    // }
 }
