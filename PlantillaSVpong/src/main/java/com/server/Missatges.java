@@ -22,6 +22,8 @@ public class Missatges {
     public static final String K_VALUE = "value";
 
     public static final String COUNTDOWN = "countdown";   
+    public static final String INIT_COUNT_DOWN = "goCountdownActivity"; 
+
     public static final int REQUIRED_CLIENTS = 2;
 
     public static final String T_SERVER_DATA = "serverData";
@@ -35,6 +37,10 @@ public class Missatges {
 
     public static final String CHECK_NAME = "checkMyName";
     public static final String CHECK_NAME_STATUS = "checkNameStatus";
+
+    public static final String WAITING_COUNTDOWN = "waitingCountdown";
+
+
     
 
     public static final String C_NAME = "clientName";

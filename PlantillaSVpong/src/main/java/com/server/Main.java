@@ -74,7 +74,9 @@ public class Main extends WebSocketServer {
 
     @Override
     public void onClose(WebSocket conn, int code, String reason, boolean remote) {
+        clientsData.remove(clients.nameBySocket(conn));
         String name = clients.remove(conn);
+        
         System.out.println("Cliente desconectado: " + name);
     }
 
@@ -100,11 +102,15 @@ public class Main extends WebSocketServer {
                 String clientName = obj.getString(Missatges.K_VALUE);
                 JSONArray namesUsed = clients.currentNames();
 
-
+                System.out.println("Nombres actuales en el server: "+namesUsed.toString());
+                System.out.println("entro "+clientName);
 
                 //comprueba si el nombre esta usado = true
-                for (int i = 0; i>namesUsed.length();i++){
+                for (int i = 0; i<namesUsed.length();i++){
+                    System.out.println("nombre usado:  "+namesUsed.get(i));
                         if(clientName.equals(namesUsed.get(i))){
+                            
+                            System.out.println(clientName+ " ya usado!!");
                             used=true;
                         }
                 }
@@ -120,17 +126,31 @@ public class Main extends WebSocketServer {
 
                 }else{
                     jo.put(Missatges.K_VALUE, Missatges.K_NAME_AVALIBLE);
-                    clientsData.put(clientName,ClientData.fromJSON(obj.getJSONObject(Missatges.K_VALUE)));
-                    sendCountdown();
+
+                    clientsData.put(clientName,new ClientData(clientName));
+
+
+                    clients.add(conn,clientName);
+                    System.out.println("Cliente conectado: " + clientName);
+
+                    
                 }
 
                 
                 sendSafe(conn, jo.toString());
                 
                 //si esta en uso desconecta al usuario
-                if(used){conn.close();}
-        
+                if(used){conn.close(); break;}
+                
+                
+                //sendCountdown();
                 break;
+
+
+
+                case Missatges.WAITING_COUNTDOWN :
+                    sendCountdown();
+                    break;
 
 
         }
@@ -211,6 +231,9 @@ public class Main extends WebSocketServer {
 
     /** Envia de forma segura un payload i, si el socket no està connectat, el neteja del registre. */
     private void sendSafe(WebSocket to, String payload) {
+
+        System.out.println(payload);
+
         if (to == null) return;
         try {
             to.send(payload);
@@ -234,8 +257,8 @@ public class Main extends WebSocketServer {
         ticker.scheduleAtFixedRate(() -> {
             try {
                 // Opcional: si no hi ha clients, evita enviar
-                if (!clients.snapshot().isEmpty()) {
-                    broadcastStatus();
+                if (clients.snapshot().size()>4) {
+                    //broadcastStatus();
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -265,14 +288,16 @@ public class Main extends WebSocketServer {
     /** Envia a tots els clients el compte enrere. */
     private void sendCountdownToAll(JSONObject jo) {
 
-
+        System.out.println("Enviando countdown");
         JSONObject rst = msg(Missatges.COUNTDOWN).put(Missatges.K_VALUE, jo);
+        System.out.println(rst.toString());
         broadcastExcept(null, rst.toString());
     }
 
 
     /** Envia un missatge a tots els clients excepte l'emissor. */
     private void broadcastExcept(WebSocket sender, String payload) {
+        System.out.println(payload);
         for (Map.Entry<WebSocket, String> e : clients.snapshot().entrySet()) {
             WebSocket conn = e.getKey();
             if (!Objects.equals(conn, sender)) sendSafe(conn, payload);
@@ -298,23 +323,40 @@ public class Main extends WebSocketServer {
 
 
             
-            
+            System.out.println("countdown iniciado!");
 
             if (clients.snapshot().size()-raspberryCount != Missatges.REQUIRED_CLIENTS) return;
 
-
+            System.out.println("paso el return");
 
             countdownRunning = true;
         }
 
         new Thread(() -> {
             try {
+
+                JSONObject json= msg(Missatges.K_TYPE)
+                .put(Missatges.K_TYPE, Missatges.INIT_COUNT_DOWN);
+
+                broadcastExcept(null,json.toString());
+
+
+                Thread.sleep(1500);
+
+
+
+
                 JSONObject jo = new JSONObject();
-                int num = 0;
+                int num = 1;
+
                 for(String name : clientsData.keySet()){
                     
                     if(name.equals("raspberryClient")) { continue;}
+
+                    System.out.println("agregando :"+name+" al countdown");
+
                     jo.put("player"+num, name);
+                    num++;
                 }
 
 
@@ -327,9 +369,11 @@ public class Main extends WebSocketServer {
                     }
                     // Si durant el compte enrere ja no hi ha els clients requerits, cancel·la
                     if (clients.snapshot().size()-raspberryCount < Missatges.REQUIRED_CLIENTS) {
+                        System.out.println("se cerro XD");
                         break;
                     }
                     jo.put("msgCountDown", i);
+
                     sendCountdownToAll(jo);
 
                     if (i > 0) Thread.sleep(750); // ritme del compte enrere
