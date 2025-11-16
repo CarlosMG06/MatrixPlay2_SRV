@@ -38,16 +38,25 @@ public class Missatges {
     public static final String CHECK_NAME = "checkMyName";
     public static final String CHECK_NAME_STATUS = "checkNameStatus";
 
-    public static final String WAITING_COUNTDOWN = "waitingCountdown";
+    public static final String C_WAITING_COUNTDOWN = "waitingCountdown";
+    public static final String C_READY_STARTGAME = "readyStartGame";
+    public static final String C_MOVE = "clientMove";
 
-
-    
+    public static final String C_INPUT = "input";
 
     public static final String C_NAME = "clientName";
     public static final String K_NAME_AVALIBLE = "NameAvalible";
     public static final String K_NAME_USED = "NameUsed";
 
 
+
+
+
+    /** Freqüència d’enviament de l’estat (frames per segon). */
+    public static final int SEND_FPS = 30;
+
+
+    public static final int REQUIRED_POINTS_TO_WIN = 5;
 
 
 

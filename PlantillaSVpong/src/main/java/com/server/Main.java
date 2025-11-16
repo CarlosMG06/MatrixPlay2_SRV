@@ -24,6 +24,8 @@ import org.json.JSONObject;
 
 public class Main extends WebSocketServer {
 
+    
+
     private boolean countdownRunning = false;
     private final ClientRegistry clients;
 
@@ -38,8 +40,7 @@ public class Main extends WebSocketServer {
 
     public static final int DEFAULT_PORT = 3000;
     
-    /** Freqüència d’enviament de l’estat (frames per segon). */
-    private static final int SEND_FPS = 30;
+    
     private final ScheduledExecutorService ticker;
 
 
@@ -47,7 +48,7 @@ public class Main extends WebSocketServer {
         super(address);
         this.clients = new ClientRegistry(PLAYER_NAMES);
         gameData = new PlayPong();
-
+        
         ThreadFactory tf = r -> {
             Thread t = new Thread(r, "ServerTicker");
             t.setDaemon(true);
@@ -76,13 +77,13 @@ public class Main extends WebSocketServer {
     public void onClose(WebSocket conn, int code, String reason, boolean remote) {
         clientsData.remove(clients.nameBySocket(conn));
         String name = clients.remove(conn);
-        
+        gameData.closeGame();
         System.out.println("Cliente desconectado: " + name);
     }
 
     @Override
     public void onMessage(WebSocket conn, String message) {
-        System.out.println("Mensaje recibido: " + message);
+        //System.out.println("Mensaje recibido: " + message);
         // mensajes futuros
 
         JSONObject obj;
@@ -148,11 +149,27 @@ public class Main extends WebSocketServer {
 
 
 
-                case Missatges.WAITING_COUNTDOWN :
+                case Missatges.C_WAITING_COUNTDOWN :
                     sendCountdown();
                     break;
 
+                case Missatges.C_READY_STARTGAME :
+                    gameData.setPlayersReady(gameData.getPlayersReady()+1);
+                    if(gameData.getPlayersReady()==2){
+                        
+                        gameData.startGame();
+                    }
+                    break;
 
+
+                case Missatges.C_MOVE :
+                    JSONObject json = obj.optJSONObject(Missatges.K_VALUE);
+                    System.out.println(json.toString());
+                    gameData.addInputs(json);
+
+
+
+                    break;
         }
     }
 
@@ -232,7 +249,7 @@ public class Main extends WebSocketServer {
     /** Envia de forma segura un payload i, si el socket no està connectat, el neteja del registre. */
     private void sendSafe(WebSocket to, String payload) {
 
-        System.out.println(payload);
+        //System.out.println(payload);
 
         if (to == null) return;
         try {
@@ -253,13 +270,17 @@ public class Main extends WebSocketServer {
     // ----------------- Ticker util -----------------
 
     private void startTicker() {
-        long periodMs = Math.max(1, 1000 / SEND_FPS);
+
+        long periodMs = Math.max(1, 1000 / Missatges.SEND_FPS);
         ticker.scheduleAtFixedRate(() -> {
             try {
                 // Opcional: si no hi ha clients, evita enviar
-                if (clients.snapshot().size()>4) {
-                    //broadcastStatus();
+                if (clients.snapshot().size()>1) {
+                    
+                    broadcastStatus();
                 }
+
+                
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -288,16 +309,16 @@ public class Main extends WebSocketServer {
     /** Envia a tots els clients el compte enrere. */
     private void sendCountdownToAll(JSONObject jo) {
 
-        System.out.println("Enviando countdown");
+        //System.out.println("Enviando countdown");
         JSONObject rst = msg(Missatges.COUNTDOWN).put(Missatges.K_VALUE, jo);
-        System.out.println(rst.toString());
+        //System.out.println(rst.toString());
         broadcastExcept(null, rst.toString());
     }
 
 
     /** Envia un missatge a tots els clients excepte l'emissor. */
     private void broadcastExcept(WebSocket sender, String payload) {
-        System.out.println(payload);
+        //System.out.println(payload);
         for (Map.Entry<WebSocket, String> e : clients.snapshot().entrySet()) {
             WebSocket conn = e.getKey();
             if (!Objects.equals(conn, sender)) sendSafe(conn, payload);
@@ -312,6 +333,7 @@ public class Main extends WebSocketServer {
 
         synchronized (this) {
 
+            
             if (countdownRunning) return;
 
 
@@ -323,11 +345,11 @@ public class Main extends WebSocketServer {
 
 
             
-            System.out.println("countdown iniciado!");
+            //System.out.println("countdown iniciado!");
 
             if (clients.snapshot().size()-raspberryCount != Missatges.REQUIRED_CLIENTS) return;
 
-            System.out.println("paso el return");
+            //System.out.println("paso el return");
 
             countdownRunning = true;
         }
@@ -335,16 +357,15 @@ public class Main extends WebSocketServer {
         new Thread(() -> {
             try {
 
+                gameData.restartGame();
+
                 JSONObject json= msg(Missatges.K_TYPE)
                 .put(Missatges.K_TYPE, Missatges.INIT_COUNT_DOWN);
 
                 broadcastExcept(null,json.toString());
 
 
-                Thread.sleep(1500);
-
-
-
+                Thread.sleep(750);
 
                 JSONObject jo = new JSONObject();
                 int num = 1;
@@ -353,9 +374,11 @@ public class Main extends WebSocketServer {
                     
                     if(name.equals("raspberryClient")) { continue;}
 
-                    System.out.println("agregando :"+name+" al countdown");
+                    //System.out.println("agregando :"+name+" al countdown");
 
                     jo.put("player"+num, name);
+
+                    gameData.addPlayer(name);
                     num++;
                 }
 
@@ -369,7 +392,7 @@ public class Main extends WebSocketServer {
                     }
                     // Si durant el compte enrere ja no hi ha els clients requerits, cancel·la
                     if (clients.snapshot().size()-raspberryCount < Missatges.REQUIRED_CLIENTS) {
-                        System.out.println("se cerro XD");
+                        //System.out.println("se cerro XD");
                         break;
                     }
                     jo.put("msgCountDown", i);
