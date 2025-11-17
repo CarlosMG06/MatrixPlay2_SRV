@@ -2,21 +2,61 @@ package com.server;
 
 public class Missatges {
 
-    public static final String K_TYPE = "type";
-    public static final String K_VALUE = "value";
+
 
     public static final String LLISTA_PERFILS = "llistaPerfils";
     public static final String EMPARELLAT = "emparellat";
     public static final String PETICIO_RESPOSTA = "peticioResposta";
-    public static final String CLIENT_OBJECT_MOVING = "clientObjectMoving";
-    public static final String CLIENT_MOUSE_MOVING = "clientMouseMoving";
-    public static final String FITXA_COLOCADA = "fitxaColocada";
     public static final String PARTIDA_FINALITZADA = "PartidaFinalitzada";
     public static final String ERROR = "error";
     public static final String INVITACIO_REBUDA = "invitacioRebuda";
     public static final String TORN_ACTUALIZTAT = "tornActualitzat";
     public static final String INVITACIO_ENVIADA = "invitacioEnviada";
+
+
+    
+
+
+
+    public static final String K_TYPE = "type";
+    public static final String K_VALUE = "value";
+
     public static final String COUNTDOWN = "countdown";   
+    public static final String INIT_COUNT_DOWN = "goCountdownActivity"; 
+
+    public static final int REQUIRED_CLIENTS = 2;
+
+    public static final String T_SERVER_DATA = "serverData";
+    public static final String K_CLIENTS_LIST = "serverClients";
+    public static final String K_GAME_DATA = "serverGameData";
+    public static final String K_CLIENT_NAME = "clientName";
+
+
+
+    public static final String K_GET_NAME = "getName";
+
+    public static final String CHECK_NAME = "checkMyName";
+    public static final String CHECK_NAME_STATUS = "checkNameStatus";
+
+    public static final String C_WAITING_COUNTDOWN = "waitingCountdown";
+    public static final String C_READY_STARTGAME = "readyStartGame";
+    public static final String C_MOVE = "clientMove";
+
+    public static final String C_INPUT = "input";
+
+    public static final String C_NAME = "clientName";
+    public static final String K_NAME_AVALIBLE = "NameAvalible";
+    public static final String K_NAME_USED = "NameUsed";
+
+
+
+
+
+    /** Freqüència d’enviament de l’estat (frames per segon). */
+    public static final int SEND_FPS = 30;
+
+
+    public static final int REQUIRED_POINTS_TO_WIN = 5;
 
 
 
