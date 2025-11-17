@@ -229,7 +229,7 @@ public class PlayPong {
 
     public boolean isPlayer(WebSocket conn,String name){
 
-        return  name != null && (name.equals(p1Name) || name.equals(p2Name));
+        return name.equals(p1Name) || name.equals(p2Name);
     }
 
 

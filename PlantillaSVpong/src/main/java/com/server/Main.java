@@ -77,7 +77,7 @@ public class Main extends WebSocketServer {
     public void onClose(WebSocket conn, int code, String reason, boolean remote) {
         clientsData.remove(clients.nameBySocket(conn));
         String name = clients.remove(conn);
-        if (gameData != null && !gameData.isPlayer(conn,clients.nameBySocket(conn))) {
+        if (gameData != null && gameData.isPlayer(conn,clients.nameBySocket(conn))) {
             gameData.closeGame();
         }
         System.out.println("Cliente desconectado: " + name);
