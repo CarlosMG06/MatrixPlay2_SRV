@@ -45,7 +45,7 @@ public class Missatges {
     public static final String C_INPUT = "input";
 
     public static final String C_NAME = "clientName";
-    public static final String K_NAME_AVALIBLE = "NameAvalible";
+    public static final String K_NAME_AVAILABLE = "NameAvailable";
     public static final String K_NAME_USED = "NameUsed";
 
 

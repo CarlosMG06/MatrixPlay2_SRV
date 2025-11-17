@@ -77,7 +77,9 @@ public class Main extends WebSocketServer {
     public void onClose(WebSocket conn, int code, String reason, boolean remote) {
         clientsData.remove(clients.nameBySocket(conn));
         String name = clients.remove(conn);
-        gameData.closeGame();
+        if (gameData != null && !gameData.isPlayer(conn)) {
+            gameData.closeGame();
+        }
         System.out.println("Cliente desconectado: " + name);
     }
 
@@ -126,14 +128,18 @@ public class Main extends WebSocketServer {
                     
 
                 }else{
-                    jo.put(Missatges.K_VALUE, Missatges.K_NAME_AVALIBLE);
+                    jo.put(Missatges.K_VALUE, Missatges.K_NAME_AVAILABLE);
 
                     clientsData.put(clientName,new ClientData(clientName));
 
 
                     clients.add(conn,clientName);
                     System.out.println("Cliente conectado: " + clientName);
-
+                    // Si es la Raspberry, la marcamos como especial
+                    if ("raspberryClient".equals(clientName)) {
+                        System.out.println("Raspberry identificada!");
+                        sendTextToRaspberry("prueba");
+                    }
                     
                 }
 
@@ -171,6 +177,16 @@ public class Main extends WebSocketServer {
 
                     break;
         }
+    }
+
+    public void sendTextToRaspberry(String text) {
+        WebSocket rpi = clients.socketByName("raspberryClient");
+        if (rpi == null) return;
+
+        JSONObject payload = msg("text")
+                .put("message", text)
+                .put("ttl_ms", 5000);
+        sendSafe(rpi, payload.toString());
     }
 
     @Override
