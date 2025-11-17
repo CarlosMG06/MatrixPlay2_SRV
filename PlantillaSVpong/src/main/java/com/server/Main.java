@@ -129,18 +129,16 @@ public class Main extends WebSocketServer {
 
                 }else{
                     jo.put(Missatges.K_VALUE, Missatges.K_NAME_AVAILABLE);
-
-                    clientsData.put(clientName,new ClientData(clientName));
-
-
-                    clients.add(conn,clientName);
-                    System.out.println("Cliente conectado: " + clientName);
+                    
                     // Si es la Raspberry, la marcamos como especial
                     if ("raspberryClient".equals(clientName)) {
                         System.out.println("Raspberry identificada!");
                         sendTextToRaspberry("prueba");
+                    }else {
+                        clientsData.put(clientName,new ClientData(clientName));
                     }
-                    
+                    clients.add(conn,clientName);
+                    System.out.println("Cliente conectado: " + clientName);
                 }
 
                 
@@ -179,15 +177,27 @@ public class Main extends WebSocketServer {
         }
     }
 
+    /** Envía un mensaje de texto a **todos los clientes**, incluyendo Raspberry */
+    public void broadcastTextToAll(String text, long ttlMs) {
+        JSONObject payload = msg("text")
+                .put("message", text)
+                .put("ttl_ms", ttlMs);
+        for (WebSocket ws : clients.snapshot().keySet()) {
+            sendSafe(ws, payload.toString());
+        }
+    }
+
+    /** Envía un mensaje solo a la Raspberry */
     public void sendTextToRaspberry(String text) {
         WebSocket rpi = clients.socketByName("raspberryClient");
         if (rpi == null) return;
 
         JSONObject payload = msg("text")
                 .put("message", text)
-                .put("ttl_ms", 5000);
+                .put("ttl_ms", 5000);  // 5 segundos de duración
         sendSafe(rpi, payload.toString());
     }
+
 
     @Override
     public void onError(WebSocket conn, Exception ex) {
