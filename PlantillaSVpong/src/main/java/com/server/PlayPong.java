@@ -1,5 +1,6 @@
 package com.server;
 
+import org.java_websocket.WebSocket;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -226,7 +227,10 @@ public class PlayPong {
     //     }, "CountdownThread").start();
     // }
 
+    public boolean isPlayer(WebSocket conn,String name){
 
+        return name.equals(p1Name) || name.equals(p2Name);
+    }
 
 
     public void tick(long ms){
