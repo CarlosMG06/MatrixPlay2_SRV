@@ -28,5 +28,10 @@ public class UtilsLog {
         write("[WARNING] "+line);
 
     }
+    public static synchronized void error(String text){
+        String line = LocalDateTime.now() + " - " + text + "\n";
+        write("[ERROR] "+line);
+
+    }
 
 }

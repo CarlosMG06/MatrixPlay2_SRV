@@ -269,7 +269,7 @@ public class PlayPong {
     public void nextRound(){
         ballXDouble=32f;
         ballX= 32;
-        ballY=((int) (Math.random()*62))+1;
+        ballY=((int) (Math.random()*40))+10;
         ballYDouble=(long)ballY;
 
         speed=1f;
@@ -367,7 +367,7 @@ public class PlayPong {
         ballY= (int) ballYDouble;
 
         if(colisionPlayers()){
-            System.out.println("XrebotoX X="+ballX+"  Y="+ballY);
+            //System.out.println("XrebotoX X="+ballX+"  Y="+ballY);
             speed*=-1;
 
             if(ballX<32){
@@ -378,7 +378,7 @@ public class PlayPong {
         }
 
         if(colisionArribaAbajo()){
-            System.out.println("YrebotoY X="+ballX+"  Y="+ballY);
+            //System.out.println("YrebotoY X="+ballX+"  Y="+ballY);
             angle*=-1;
         }
 
@@ -420,7 +420,7 @@ public class PlayPong {
     }
 
     public void startGame() {
-        System.out.println("game iniciado!!");
+        //System.out.println("game iniciado!!");
         setGameThread();
 
         long periodMs = Math.max(1, 1000 / Missatges.SEND_FPS);
@@ -428,7 +428,7 @@ public class PlayPong {
             try {
                 //System.out.println("dentro de game --------------------------------------------------------\n----------------------------------");
                 tick(periodMs);
-                System.out.println("game fun");
+                //System.out.println("game fun");
                 //System.out.println("X: "+ballX+" Y:"+ballY);
                 if(checkWinner()){
                     UtilsLog.info("Juego acabado");
