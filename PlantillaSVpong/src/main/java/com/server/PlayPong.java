@@ -74,10 +74,12 @@ public class PlayPong {
     public void addPlayer(String name){
         if(p1Name.equals("")){
             p1Name=name;
+            Main.clientsData.get(p1Name).player=1;
             return;
         }
         if(p2Name.equals("")){
             p2Name=name;
+            Main.clientsData.get(p2Name).player=2;
         }
         
     }
@@ -281,19 +283,21 @@ public class PlayPong {
         while ((input = playerInputs.poll()) != null) {
 
             //si la possY + lo que mide el rec pasa del camvas no se mueve
-            // if(input.getPossY()>(screenSize-recHeight)||(input.getPossY()<0)){
-            //         continue;
-            //     }
+            if(input.getPossY()>(screenSize-recHeight)||(input.getPossY()<0)){
+                    continue;
+                }
 
             //primer player
             if(input.getPlayer().equals(p1Name)){
                 p1possY=input.getPossY();
+                Main.clientsData.get(p1Name).poss=p1possY;
                 continue;
             }
             
             else{
             //segundo player
             p2possY=input.getPossY();
+            Main.clientsData.get(p2Name).poss=p2possY;
             }
             
             
@@ -305,12 +309,14 @@ public class PlayPong {
         
         if (ballX == 0){
             p2Points++;
+            Main.clientsData.get(p2Name).points++;
             gameState= states.ROUND_END;
             
             //System.out.println("gol P2 X="+ballX+"  Y="+ballY);
         }
         if(ballX+ballSize == screenSize-1){
             p1Points++;
+            Main.clientsData.get(p1Name).points++;
             gameState= states.ROUND_END;
             
             //System.out.println("gol P1 X="+ballX+"  Y="+ballY);
@@ -404,8 +410,12 @@ public class PlayPong {
 
     private boolean checkWinner(){
         
-        if(p1Points>=Missatges.REQUIRED_POINTS_TO_WIN){return true;}
-        if(p2Points>=Missatges.REQUIRED_POINTS_TO_WIN){return true;}
+        if(p1Points>=Missatges.REQUIRED_POINTS_TO_WIN){
+            UtilsLog.info(p1Name+" gano el juego"); 
+            return true;}
+        if(p2Points>=Missatges.REQUIRED_POINTS_TO_WIN){
+            UtilsLog.info(p2Name+" gano el juego"); 
+            return true;}
         return false;
     }
 
@@ -421,6 +431,7 @@ public class PlayPong {
                 System.out.println("game fun");
                 //System.out.println("X: "+ballX+" Y:"+ballY);
                 if(checkWinner()){
+                    UtilsLog.info("Juego acabado");
                     game.close();
                 }
 

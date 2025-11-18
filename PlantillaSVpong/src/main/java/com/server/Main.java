@@ -30,7 +30,7 @@ public class Main extends WebSocketServer {
     private final ClientRegistry clients;
 
     /** Mapa d’estat per client (source of truth del servidor). Clau = name/id. */
-    public final Map<String, ClientData> clientsData = new HashMap<>();
+    public static final Map<String, ClientData> clientsData = new HashMap<>();
 
     public final PlayPong gameData;
 
@@ -71,6 +71,7 @@ public class Main extends WebSocketServer {
         // broadcast(msg.toString());
 
         getName(conn);
+        UtilsLog.info("nueva coneccion.");
     }
 
     @Override
@@ -80,6 +81,7 @@ public class Main extends WebSocketServer {
         if (gameData != null && gameData.isPlayer(conn,clients.nameBySocket(conn))) {
             gameData.closeGame();
         }
+        UtilsLog.info(name + "se desconecto.");
         System.out.println("Cliente desconectado: " + name);
     }
 
@@ -133,12 +135,14 @@ public class Main extends WebSocketServer {
                     // Si es la Raspberry, la marcamos como especial
                     if ("raspberryClient".equals(clientName)) {
                         System.out.println("Raspberry identificada!");
+                        UtilsLog.info(clientName+" conectado");
                         sendTextToRaspberry("prueba");
                     }else {
                         clientsData.put(clientName,new ClientData(clientName));
                     }
                     clients.add(conn,clientName);
                     System.out.println("Cliente conectado: " + clientName);
+                    UtilsLog.info(clientName+" añadido a clientData (jugadores)");
                 }
 
                 
@@ -161,6 +165,7 @@ public class Main extends WebSocketServer {
                     gameData.setPlayersReady(gameData.getPlayersReady()+1);
                     if(gameData.getPlayersReady()==2){
                         
+                        UtilsLog.info("Juego empezado");
                         gameData.startGame();
                     }
                     break;
