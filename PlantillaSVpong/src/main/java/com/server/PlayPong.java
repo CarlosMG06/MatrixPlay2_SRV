@@ -73,12 +73,10 @@ public class PlayPong {
     public void addPlayer(String name){
         if(p1Name.equals("")){
             p1Name=name;
-            Main.clientsData.get(name).player = 1;
             return;
         }
         if(p2Name.equals("")){
             p2Name=name;
-            Main.clientsData.get(name).player = 2;
         }
         
     }
@@ -279,21 +277,19 @@ public class PlayPong {
         while ((input = playerInputs.poll()) != null) {
 
             //si la possY + lo que mide el rec pasa del camvas no se mueve
-            if(input.getPossY()>(screenSize-recHeight)||(input.getPossY()<0)){
-                    continue;
-                }
+            // if(input.getPossY()>(screenSize-recHeight)||(input.getPossY()<0)){
+            //         continue;
+            //     }
 
             //primer player
             if(input.getPlayer().equals(p1Name)){
                 p1possY=input.getPossY();
-                Main.clientsData.get(p1Name).setPoss(p1Points);
                 continue;
             }
             
             else{
             //segundo player
             p2possY=input.getPossY();
-            Main.clientsData.get(p2Name).setPoss(p1Points);
             }
             
             
@@ -305,14 +301,12 @@ public class PlayPong {
         
         if (ballX == 0){
             p2Points++;
-            Main.clientsData.get(p2Name).points++;
             gameState= states.ROUND_END;
             
             //System.out.println("gol P2 X="+ballX+"  Y="+ballY);
         }
         if(ballX+ballSize == screenSize-1){
             p1Points++;
-            Main.clientsData.get(p1Name).points++;
             gameState= states.ROUND_END;
             
             //System.out.println("gol P1 X="+ballX+"  Y="+ballY);

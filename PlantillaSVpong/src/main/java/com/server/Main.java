@@ -30,7 +30,7 @@ public class Main extends WebSocketServer {
     private final ClientRegistry clients;
 
     /** Mapa d’estat per client (source of truth del servidor). Clau = name/id. */
-    public static final Map<String, ClientData> clientsData = new HashMap<>();
+    public final Map<String, ClientData> clientsData = new HashMap<>();
 
     public final PlayPong gameData;
 
@@ -78,7 +78,6 @@ public class Main extends WebSocketServer {
         clientsData.remove(clients.nameBySocket(conn));
         String name = clients.remove(conn);
         gameData.closeGame();
-        UtilsLog.info(name  + "desconectado");
         System.out.println("Cliente desconectado: " + name);
     }
 
@@ -184,7 +183,6 @@ public class Main extends WebSocketServer {
         System.out.println("Servidor WebSocket iniciado en puerto " + getPort());
         setConnectionLostTimeout(100);
         startTicker();
-        UtilsLog.info("Servidor iniciado");
     }
 
     
@@ -384,7 +382,7 @@ public class Main extends WebSocketServer {
                     num++;
                 }
 
-                
+
 
                 for (int i = 5; i >= 0; i--) {
                     int raspberryCount = 0;

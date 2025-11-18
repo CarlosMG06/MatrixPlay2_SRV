@@ -1,5 +1,4 @@
 com\server\Main.class
-com\server\UtilsLog.class
 com\server\Input.class
 com\server\Missatges.class
 com\server\PlayPong$states.class
