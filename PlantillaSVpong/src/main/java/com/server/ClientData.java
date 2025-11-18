@@ -48,4 +48,14 @@ public class ClientData {
         cd.points = obj.optInt("points", -1);
         return cd;
     }
+
+    public void setPoints(int n){
+        points=n;
+    }
+    public void setPoss(int n){
+        poss=n;
+    }
+    public void setNPlayer(int n){
+        player = n;
+    }
 }
