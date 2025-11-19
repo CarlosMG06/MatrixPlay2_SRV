@@ -137,6 +137,7 @@ public class Main extends WebSocketServer {
                         //System.out.println("Raspberry identificada!");
                         UtilsLog.info(clientName+" conectado");
                         sendRaspberryConfig(conn);
+                        sendTextToRaspberry("¡Hola Raspberry! Conexión OK.");
                     }else {
                         clientsData.put(clientName,new ClientData(clientName));
                     }
