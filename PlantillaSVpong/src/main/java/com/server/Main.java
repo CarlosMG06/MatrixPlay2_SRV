@@ -136,7 +136,7 @@ public class Main extends WebSocketServer {
                     if ("raspberryClient".equals(clientName)) {
                         //System.out.println("Raspberry identificada!");
                         UtilsLog.info(clientName+" conectado");
-                        sendTextToRaspberry("prueba");
+                        sendRaspberryConfig(conn);
                     }else {
                         clientsData.put(clientName,new ClientData(clientName));
                     }
@@ -181,6 +181,15 @@ public class Main extends WebSocketServer {
                     break;
         }
     }
+
+    private void sendRaspberryConfig(WebSocket rpi) {
+        JSONObject config = new JSONObject();
+        config.put("type", "config");
+        config.put("groupName", "matrixplay2");
+        config.put("url", "wss://matrixplay2.ieti.site:443");
+        sendSafe(rpi, config.toString());
+    }
+
 
     /** Envía un mensaje de texto a **todos los clientes**, incluyendo Raspberry */
     public void broadcastTextToAll(String text, long ttlMs) {
