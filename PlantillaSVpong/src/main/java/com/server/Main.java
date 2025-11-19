@@ -30,7 +30,7 @@ public class Main extends WebSocketServer {
     private final ClientRegistry clients;
 
     /** Mapa d’estat per client (source of truth del servidor). Clau = name/id. */
-    public final Map<String, ClientData> clientsData = new HashMap<>();
+    public static final Map<String, ClientData> clientsData = new HashMap<>();
 
     public final PlayPong gameData;
 
@@ -71,6 +71,7 @@ public class Main extends WebSocketServer {
         // broadcast(msg.toString());
 
         getName(conn);
+        UtilsLog.info("nueva coneccion.");
     }
 
     @Override
@@ -80,7 +81,8 @@ public class Main extends WebSocketServer {
         if (gameData != null && gameData.isPlayer(conn,clients.nameBySocket(conn))) {
             gameData.closeGame();
         }
-        System.out.println("Cliente desconectado: " + name);
+        UtilsLog.info(name + "se desconecto.");
+        //System.out.println("Cliente desconectado: " + name);
     }
 
     @Override
@@ -105,15 +107,15 @@ public class Main extends WebSocketServer {
                 String clientName = obj.getString(Missatges.K_VALUE);
                 JSONArray namesUsed = clients.currentNames();
 
-                System.out.println("Nombres actuales en el server: "+namesUsed.toString());
-                System.out.println("entro "+clientName);
+                //System.out.println("Nombres actuales en el server: "+namesUsed.toString());
+                //System.out.println("entro "+clientName);
 
                 //comprueba si el nombre esta usado = true
                 for (int i = 0; i<namesUsed.length();i++){
-                    System.out.println("nombre usado:  "+namesUsed.get(i));
+                    //System.out.println("nombre usado:  "+namesUsed.get(i));
                         if(clientName.equals(namesUsed.get(i))){
                             
-                            System.out.println(clientName+ " ya usado!!");
+                            //System.out.println(clientName+ " ya usado!!");
                             used=true;
                         }
                 }
@@ -132,13 +134,15 @@ public class Main extends WebSocketServer {
                     
                     // Si es la Raspberry, la marcamos como especial
                     if ("raspberryClient".equals(clientName)) {
-                        System.out.println("Raspberry identificada!");
+                        //System.out.println("Raspberry identificada!");
+                        UtilsLog.info(clientName+" conectado");
                         sendTextToRaspberry("prueba");
                     }else {
                         clientsData.put(clientName,new ClientData(clientName));
                     }
                     clients.add(conn,clientName);
-                    System.out.println("Cliente conectado: " + clientName);
+                    //System.out.println("Cliente conectado: " + clientName);
+                    UtilsLog.info(clientName+" añadido a clientData (jugadores)");
                 }
 
                 
@@ -161,6 +165,7 @@ public class Main extends WebSocketServer {
                     gameData.setPlayersReady(gameData.getPlayersReady()+1);
                     if(gameData.getPlayersReady()==2){
                         
+                        UtilsLog.info("Juego empezado");
                         gameData.startGame();
                     }
                     break;
@@ -168,7 +173,7 @@ public class Main extends WebSocketServer {
 
                 case Missatges.C_MOVE :
                     JSONObject json = obj.optJSONObject(Missatges.K_VALUE);
-                    System.out.println(json.toString());
+                    //System.out.println(json.toString());
                     gameData.addInputs(json);
 
 
@@ -206,6 +211,7 @@ public class Main extends WebSocketServer {
 
     @Override
     public void onStart() {
+        UtilsLog.info("Servidor WebSocket iniciado en puerto " + getPort());
         System.out.println("Servidor WebSocket iniciado en puerto " + getPort());
         setConnectionLostTimeout(100);
         startTicker();
@@ -226,6 +232,7 @@ public class Main extends WebSocketServer {
     /** Registra un shutdown hook per aturar netament el servidor en finalitzar el procés. */
     private static void registerShutdownHook(Main server) {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            UtilsLog.warning("Aturant servidor (shutdown hook)...");
             System.out.println("Aturant servidor (shutdown hook)...");
             try {
                 server.stopTicker();      // <- atura el bucle periòdic
@@ -234,6 +241,7 @@ public class Main extends WebSocketServer {
                 e.printStackTrace();
                 Thread.currentThread().interrupt();
             }
+            UtilsLog.info("Servidor aturat.");
             System.out.println("Servidor aturat.");
         }));
     }
@@ -283,6 +291,7 @@ public class Main extends WebSocketServer {
         } catch (WebsocketNotConnectedException e) {
             String name = clients.cleanupDisconnected(to);
             clientsData.remove(name);
+            UtilsLog.error("Client desconnectat durant send: " + name);
             System.out.println("Client desconnectat durant send: " + name);
         } catch (Exception e) {
             e.printStackTrace();
