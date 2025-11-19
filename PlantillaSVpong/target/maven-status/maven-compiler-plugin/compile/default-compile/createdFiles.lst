@@ -2,6 +2,7 @@ com/server/UtilsWS$1.class
 com/server/PlayPong.class
 com/server/Main.class
 com/server/Missatges.class
+com/server/UtilsLog.class
 com/server/UtilsWS.class
 com/server/ClientData.class
 com/server/PlayPong$states.class
