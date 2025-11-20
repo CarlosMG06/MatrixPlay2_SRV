@@ -53,9 +53,9 @@ public class PlayPong {
     private double ballXDouble;
     private double ballYDouble;
 
-    private double angle;
+    private double speedY;
 
-    private double speed;
+    private double speedX;
 
     private double screenSize;
 
@@ -131,8 +131,8 @@ public class PlayPong {
         ballXDouble=32f;
         ballYDouble=32f;
 
-        angle=1;
-        speed=2;
+        speedY=1;
+        speedX=2;
         
         screenSize = 64;
 
@@ -161,8 +161,8 @@ public class PlayPong {
         ballXDouble = 32f;
         ballYDouble = 32f;
 
-        angle=0.7;
-        speed=1;
+        speedY=0.7;
+        speedX=1;
         
         screenSize = 64;
 
@@ -270,7 +270,7 @@ public class PlayPong {
         ballY=((int) (Math.random()*62))+1;
         ballYDouble=(long)ballY;
 
-        speed=1f;
+        speedX=1f;
         
         gameState= states.WAITING_START;
     }
@@ -354,26 +354,26 @@ public class PlayPong {
 
     public void updateGame(long ms){
 
-        ballXDouble += speed * (ms / 80.0);
+        ballXDouble += speedX * (ms / 80.0);
         ballX= (int) ballXDouble;
 
-        ballYDouble += angle * (ms / 80.0);
+        ballYDouble += speedY * (ms / 80.0);
         ballY= (int) ballYDouble;
 
         if(colisionPlayers()){
-            System.out.println("XrebotoX X="+ballX+"  Y="+ballY);
-            speed*=-1;
+            //System.out.println("XrebotoX X="+ballX+"  Y="+ballY);
+            speedX*=-1;
 
             if(ballX<32){
-                speed+=0.1;
+                speedX+=0.1;
             }else{
-                speed-=0.1;
+                speedX-=0.1;
             }
         }
 
         if(colisionArribaAbajo()){
-            System.out.println("YrebotoY X="+ballX+"  Y="+ballY);
-            angle*=-1;
+            //System.out.println("YrebotoY X="+ballX+"  Y="+ballY);
+            speedY*=-1;
         }
 
     }
