@@ -392,8 +392,8 @@ public class PlayPong {
         obj.put("p2PossY", p2possY);
         obj.put("p1Points", p1Points);
         obj.put("p2Points", p2Points);
-        obj.put("ballX", ballX);
-        obj.put("ballY", ballY);
+        obj.put("ballX", ballXDouble);
+        obj.put("ballY", ballYDouble);
         return obj;
     }
 
