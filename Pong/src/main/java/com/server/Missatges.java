@@ -24,6 +24,7 @@ public class Missatges {
     public static final String COUNTDOWN = "countdown";   
     public static final String INIT_COUNT_DOWN = "goCountdownActivity"; 
 
+
     public static final int REQUIRED_CLIENTS = 2;
 
     public static final String T_SERVER_DATA = "serverData";
@@ -31,6 +32,8 @@ public class Missatges {
     public static final String K_GAME_DATA = "serverGameData";
     public static final String K_CLIENT_NAME = "clientName";
 
+    public static final String INIT_ROUND_COUNT_DOWN = "roundCountDown";
+    public static final String ROUND_COUNT_DOWN = "msgCountDown";
 
 
     public static final String K_GET_NAME = "getName";
