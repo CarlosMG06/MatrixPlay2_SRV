@@ -378,7 +378,7 @@ public class PlayPong {
 
         if(colisionArribaAbajo()){
             //System.out.println("YrebotoY X="+ballX+"  Y="+ballY);
-            angle*=-1;
+            speedY*=-1;
             if(ballY<32){
                 ballYDouble=1f;
             }else{
