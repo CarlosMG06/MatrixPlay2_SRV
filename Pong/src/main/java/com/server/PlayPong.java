@@ -369,10 +369,10 @@ public class PlayPong {
 
             if(ballX<32){
                 ballXDouble=(double)(recWitdh+1);
-                speed+=0.1;
+                speedX+=0.1;
             }else{
                 ballXDouble=(double)(screenSize-recWitdh-ballSize);
-                speed-=0.1;
+                speedX-=0.1;
             }
         }
 
