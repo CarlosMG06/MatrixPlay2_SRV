@@ -12,6 +12,10 @@ import java.util.concurrent.TimeUnit;
 
 import org.json.JSONObject;
 
+interface GameEndListener {
+    void onGameEnd(String winnerName);
+}
+
 public class PlayPong {
 
     private enum states{ 
@@ -30,6 +34,7 @@ public class PlayPong {
 
     private String p1Name;
     private String p2Name;
+    private String winnerName = "";
 
 
     private int recHeight;
@@ -58,6 +63,12 @@ public class PlayPong {
     private double speedX;
 
     private double screenSize;
+
+    private GameEndListener gameEndListener;
+
+    public void setGameEndListener(GameEndListener listener) {
+        this.gameEndListener = listener;
+    }
 
     public void closeGame(){
         game.shutdownNow();
@@ -409,12 +420,13 @@ public class PlayPong {
     }
 
     private boolean checkWinner(){
-        
         if(p1Points>=Missatges.REQUIRED_POINTS_TO_WIN){
-            UtilsLog.info(p1Name+" gano el juego"); 
+            UtilsLog.info(p1Name+" gano el juego");
+            winnerName = p1Name;
             return true;}
         if(p2Points>=Missatges.REQUIRED_POINTS_TO_WIN){
             UtilsLog.info(p2Name+" gano el juego"); 
+            winnerName = p2Name;
             return true;}
         return false;
     }
@@ -432,6 +444,7 @@ public class PlayPong {
                 //System.out.println("X: "+ballX+" Y:"+ballY);
                 if(checkWinner()){
                     UtilsLog.info("Juego acabado");
+                    gameEndListener.onGameEnd(winnerName);
                     game.close();
                 }
 

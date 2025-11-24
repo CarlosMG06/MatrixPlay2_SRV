@@ -48,6 +48,7 @@ public class Main extends WebSocketServer {
         super(address);
         this.clients = new ClientRegistry(PLAYER_NAMES);
         gameData = new PlayPong();
+        gameData.setGameEndListener(winnerName -> notifyWinner(winnerName));
         
         ThreadFactory tf = r -> {
             Thread t = new Thread(r, "ServerTicker");
@@ -452,6 +453,12 @@ public class Main extends WebSocketServer {
                 countdownRunning = false;
             }
         }, "CountdownThread").start();
+    }
+
+    private void notifyWinner(String winnerName) {
+        JSONObject msg = msg(Missatges.T_WINNER)
+            .put(Missatges.K_VALUE, winnerName);
+        broadcastExcept(null, msg.toString());
     }
 
 }

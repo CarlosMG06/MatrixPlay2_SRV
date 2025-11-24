@@ -48,7 +48,7 @@ public class Missatges {
     public static final String K_NAME_AVAILABLE = "NameAvailable";
     public static final String K_NAME_USED = "NameUsed";
 
-
+    public static final String T_WINNER = "winner";
 
 
 
