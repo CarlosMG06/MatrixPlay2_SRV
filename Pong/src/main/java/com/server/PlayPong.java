@@ -267,9 +267,9 @@ public class PlayPong {
         
         random =(int)(Math.random()*2)+1;
         if(random==1){
-            speed=1f;
+            speedX=1f;
         }else{
-            speed=-1f;
+            speedX=-1f;
         }
         gameState= states.WAITING_START;
     }
