@@ -27,7 +27,7 @@ public class Main extends WebSocketServer {
     
 
     private boolean countdownRunning = false;
-    private final ClientRegistry clients;
+    public final ClientRegistry clients;
 
     /** Mapa d’estat per client (source of truth del servidor). Clau = name/id. */
     public static final Map<String, ClientData> clientsData = new HashMap<>();
@@ -266,6 +266,18 @@ public class Main extends WebSocketServer {
         }
     }
 
+    private void broadcastRoundCountdown(){
+        if(!gameData.isRoundCountdownRunning()){return;}
+
+        JSONObject json = msg(Missatges.INIT_ROUND_COUNT_DOWN)
+        .put(Missatges.K_VALUE,gameData.getCountDown());
+        System.out.println(json.toString());
+        for (Map.Entry<WebSocket, String> e : clients.snapshot().entrySet()) {
+            WebSocket conn = e.getKey();
+            sendSafe(conn, json.toString());
+        }
+
+    }
 
     private void broadcastStatus() {
 
@@ -321,8 +333,8 @@ public class Main extends WebSocketServer {
             try {
                 // Opcional: si no hi ha clients, evita enviar
                 if (clients.snapshot().size()>1) {
-                    
                     broadcastStatus();
+                    broadcastRoundCountdown();
                 }
 
                 
@@ -362,7 +374,7 @@ public class Main extends WebSocketServer {
 
 
     /** Envia un missatge a tots els clients excepte l'emissor. */
-    private void broadcastExcept(WebSocket sender, String payload) {
+    public void broadcastExcept(WebSocket sender, String payload) {
         //System.out.println(payload);
         for (Map.Entry<WebSocket, String> e : clients.snapshot().entrySet()) {
             WebSocket conn = e.getKey();
