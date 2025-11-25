@@ -56,6 +56,8 @@ public class Missatges {
     public static final String C_PLAY_AGAIN = "playAgain";
     public static final String C_EXIT = "exit";
 
+    public static final String R_WAITING_SCREEN = "waitingScreen";
+
     /** Freqüència d’enviament de l’estat (frames per segon). */
     public static final int SEND_FPS = 30;
 
