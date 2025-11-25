@@ -159,6 +159,13 @@ public class Main extends WebSocketServer {
 
 
             case Missatges.C_WAITING_COUNTDOWN :
+                WebSocket ws = clients.socketByName("raspberryClient");
+                if(ws!=null&&clientsData.size()==1){
+                    JSONObject jmsg = msg(Missatges.R_WAITING_SCREEN);
+                    sendSafe(ws,jmsg.toString());
+                }
+                
+
                 sendCountdown();
                 break;
 
@@ -189,8 +196,6 @@ public class Main extends WebSocketServer {
                 clientsData.put(clientName,new ClientData(clientName));
                 logDB(clientName+" quiere jugar de nuevo.");
 
-                gameData.restartGameData();
-                sendCountdown();
                 break;
         }
     }
