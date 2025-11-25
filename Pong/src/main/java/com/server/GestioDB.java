@@ -31,9 +31,11 @@ public class GestioDB {
     }
 
     // Usa la connexió general
-    public static void afegeixEntradaLog(String text, String data) throws SQLException {
+    public static void afegeixEntradaLog(String text) throws SQLException {
+        String now = java.time.LocalDateTime.now().toString();
         UtilsSQLite.queryUpdatePS(connGeneral,
                 "INSERT INTO log (valor, data) VALUES (?, ?)",
-                text, data);
+                text, now);
     }
+
 }

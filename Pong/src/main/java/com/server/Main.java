@@ -70,7 +70,7 @@ public class Main extends WebSocketServer {
         // broadcast(msg.toString());
 
         getName(conn);
-        UtilsLog.info("nueva coneccion.");
+        GestioDB.afegeixEntradaLog("nueva coneccion.");
     }
 
     @Override
@@ -80,7 +80,7 @@ public class Main extends WebSocketServer {
         if (gameData != null && gameData.isPlayer(conn,name)) {
             gameData.closeGame();
         }
-        UtilsLog.info(name + "se desconecto.");
+        GestioDB.afegeixEntradaLog(name + "se desconecto.");
         //System.out.println("Cliente desconectado: " + name);
     }
 
@@ -134,7 +134,7 @@ public class Main extends WebSocketServer {
                     // Si es la Raspberry, la marcamos como especial
                     if ("raspberryClient".equals(clientName)) {
                         //System.out.println("Raspberry identificada!");
-                        UtilsLog.info(clientName+" conectado");
+                        GestioDB.afegeixEntradaLog(clientName+" conectado");
                         sendRaspberryConfig(conn);
                         sendTextToRaspberry("¡Hola Raspberry! Conexión OK.");
                     }else {
@@ -142,7 +142,7 @@ public class Main extends WebSocketServer {
                     }
                     clients.add(conn,clientName);
                     //System.out.println("Cliente conectado: " + clientName);
-                    UtilsLog.info(clientName+" añadido a clientData (jugadores)");
+                    GestioDB.afegeixEntradaLog(clientName+" añadido a clientData (jugadores)");
                 }
 
                 
@@ -165,7 +165,7 @@ public class Main extends WebSocketServer {
                 gameData.setPlayersReady(gameData.getPlayersReady()+1);
                 
                 if(gameData.getPlayersReady()==2){
-                    UtilsLog.info("Juego empezado");
+                    GestioDB.afegeixEntradaLog("Juego empezado");
                     gameData.startGame();
                 }
                 break;
@@ -180,7 +180,7 @@ public class Main extends WebSocketServer {
             case Missatges.C_PLAY_AGAIN :
                 clientName = obj.getString(Missatges.K_VALUE);
                 clientsData.put(clientName,new ClientData(clientName));
-                UtilsLog.info(clientName+" quiere jugar de nuevo.");
+                GestioDB.afegeixEntradaLog(clientName+" quiere jugar de nuevo.");
 
                 gameData.restartGameData();
                 sendCountdown();
@@ -226,7 +226,15 @@ public class Main extends WebSocketServer {
 
     @Override
     public void onStart() {
-        UtilsLog.info("Servidor WebSocket iniciado en puerto " + getPort());
+            try {
+            GestioDB.crearDB();          // Crea el archivo y la tabla si no existen
+            GestioDB.iniciarConnexio();  // Abre la conexión SQLite
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("Error inicializando la BD: " + e.getMessage());
+        }
+
+        GestioDB.afegeixEntradaLog("Servidor WebSocket iniciado en puerto " + getPort());
         System.out.println("Servidor WebSocket iniciado en puerto " + getPort());
         setConnectionLostTimeout(100);
         startTicker();
@@ -247,19 +255,21 @@ public class Main extends WebSocketServer {
     /** Registra un shutdown hook per aturar netament el servidor en finalitzar el procés. */
     private static void registerShutdownHook(Main server) {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            UtilsLog.warning("Aturant servidor (shutdown hook)...");
-            System.out.println("Aturant servidor (shutdown hook)...");
+            GestioDB.afegeixEntradaLog("Aturando servidor...");
+            System.out.println("Aturando servidor...");
             try {
-                server.stopTicker();      // <- atura el bucle periòdic
+                server.stopTicker();
                 server.stop(1000);
+                GestioDB.tancarConnexio(); // <--- Cierra la conexión SQLite
             } catch (InterruptedException e) {
                 e.printStackTrace();
                 Thread.currentThread().interrupt();
             }
-            UtilsLog.info("Servidor aturat.");
+            GestioDB.afegeixEntradaLog("Servidor aturat.");
             System.out.println("Servidor aturat.");
         }));
     }
+
 
     /** Bloqueja el fil principal indefinidament fins que sigui interromput. */
     private static void awaitForever() {
@@ -318,7 +328,7 @@ public class Main extends WebSocketServer {
         } catch (WebsocketNotConnectedException e) {
             String name = clients.cleanupDisconnected(to);
             clientsData.remove(name);
-            UtilsLog.error("Client desconnectat durant send: " + name);
+            GestioDB.afegeixEntradaLog("Client desconnectat durant send: " + name);
             System.out.println("Client desconnectat durant send: " + name);
         } catch (Exception e) {
             e.printStackTrace();
@@ -464,7 +474,7 @@ public class Main extends WebSocketServer {
     private void onGameEnd(String winnerName) {
         clientsData.clear();
         
-        System.out.println("clientsData size:" + clientsData.size());
+        GestioDB.afegeixEntradaLog("clientsData size:" + clientsData.size());
 
         JSONObject msg = msg(Missatges.T_WINNER)
             .put(Missatges.K_VALUE, winnerName);
