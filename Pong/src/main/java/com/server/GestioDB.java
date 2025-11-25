@@ -38,4 +38,10 @@ public class GestioDB {
                 text, now);
     }
 
+    public static void tancarConnexio() {
+        UtilsSQLite.disconnect(connGeneral);
+        connGeneral = null;
+    }
+
+
 }

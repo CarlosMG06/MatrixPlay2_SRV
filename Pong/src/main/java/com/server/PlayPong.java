@@ -1,6 +1,8 @@
 package com.server;
 
 import org.java_websocket.WebSocket;
+
+import java.sql.SQLException;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -394,11 +396,11 @@ public class PlayPong {
 
     private boolean checkWinner(){
         if(p1Points>=Missatges.REQUIRED_POINTS_TO_WIN){
-            UtilsLog.info(p1Name+" gano el juego");
+            logDB(p1Name+" gano el juego");
             winnerName = p1Name;
             return true;}
         if(p2Points>=Missatges.REQUIRED_POINTS_TO_WIN){
-            UtilsLog.info(p2Name+" gano el juego"); 
+            logDB(p2Name+" gano el juego"); 
             winnerName = p2Name;
             return true;}
         return false;
@@ -416,7 +418,7 @@ public class PlayPong {
                 //System.out.println("game fun");
                 //System.out.println("X: "+ballX+" Y:"+ballY);
                 if(checkWinner()){
-                    UtilsLog.info("Juego acabado");
+                    logDB("Juego acabado");
                     gameEndListener.onGameEnd(winnerName);
                     game.close();
                     stopGame();
@@ -435,4 +437,14 @@ public class PlayPong {
             Thread.currentThread().interrupt();
         }
     }
+
+    private void logDB(String msg) {
+        try {
+            String now = java.time.LocalDateTime.now().toString();
+            GestioDB.afegeixEntradaLog(msg);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
 }
