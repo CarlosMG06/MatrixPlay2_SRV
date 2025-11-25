@@ -170,6 +170,11 @@ public class Main extends WebSocketServer {
                 }
                 break;
 
+            case Missatges.C_EXIT :
+                String name = clients.remove(conn);
+                clientsData.remove(name);
+                break;
+
 
             case Missatges.C_MOVE :
                 JSONObject json = obj.optJSONObject(Missatges.K_VALUE);
@@ -182,8 +187,8 @@ public class Main extends WebSocketServer {
                 clientsData.put(clientName,new ClientData(clientName));
                 UtilsLog.info(clientName+" quiere jugar de nuevo.");
 
-                gameData.restartGameData();
-                sendCountdown();
+                // gameData.restartGameData();
+                // sendCountdown();
                 break;
         }
     }
