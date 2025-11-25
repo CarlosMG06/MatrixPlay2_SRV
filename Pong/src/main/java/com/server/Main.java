@@ -24,10 +24,9 @@ import org.json.JSONObject;
 
 public class Main extends WebSocketServer {
 
-    
 
     private boolean countdownRunning = false;
-    private final ClientRegistry clients;
+    public final ClientRegistry clients;
 
     /** Mapa d’estat per client (source of truth del servidor). Clau = name/id. */
     public static final Map<String, ClientData> clientsData = new HashMap<>();
@@ -40,7 +39,6 @@ public class Main extends WebSocketServer {
 
     public static final int DEFAULT_PORT = 3000;
     
-    
     private final ScheduledExecutorService ticker;
 
 
@@ -48,6 +46,7 @@ public class Main extends WebSocketServer {
         super(address);
         this.clients = new ClientRegistry(PLAYER_NAMES);
         gameData = new PlayPong();
+        gameData.setGameEndListener(winnerName -> onGameEnd(winnerName));
         
         ThreadFactory tf = r -> {
             Thread t = new Thread(r, "ServerTicker");
@@ -158,28 +157,34 @@ public class Main extends WebSocketServer {
 
 
 
-                case Missatges.C_WAITING_COUNTDOWN :
-                    sendCountdown();
-                    break;
+            case Missatges.C_WAITING_COUNTDOWN :
+                sendCountdown();
+                break;
 
-                case Missatges.C_READY_STARTGAME :
-                    gameData.setPlayersReady(gameData.getPlayersReady()+1);
-                    if(gameData.getPlayersReady()==2){
-                        
-                        UtilsLog.info("Juego empezado");
-                        gameData.startGame();
-                    }
-                    break;
-
-
-                case Missatges.C_MOVE :
-                    JSONObject json = obj.optJSONObject(Missatges.K_VALUE);
-                    //System.out.println(json.toString());
-                    gameData.addInputs(json);
+            case Missatges.C_READY_STARTGAME :
+                gameData.setPlayersReady(gameData.getPlayersReady()+1);
+                
+                if(gameData.getPlayersReady()==2){
+                    UtilsLog.info("Juego empezado");
+                    gameData.startGame();
+                }
+                break;
 
 
+            case Missatges.C_MOVE :
+                JSONObject json = obj.optJSONObject(Missatges.K_VALUE);
+                //System.out.println(json.toString());
+                gameData.addInputs(json);
+                break;
 
-                    break;
+            case Missatges.C_PLAY_AGAIN :
+                clientName = obj.getString(Missatges.K_VALUE);
+                clientsData.put(clientName,new ClientData(clientName));
+                UtilsLog.info(clientName+" quiere jugar de nuevo.");
+
+                gameData.restartGameData();
+                sendCountdown();
+                break;
         }
     }
 
@@ -266,6 +271,18 @@ public class Main extends WebSocketServer {
         }
     }
 
+    private void broadcastRoundCountdown(){
+        if(!gameData.isRoundCountdownRunning()){return;}
+
+        JSONObject json = msg(Missatges.INIT_ROUND_COUNT_DOWN)
+        .put(Missatges.K_VALUE,gameData.getCountDown());
+        System.out.println(json.toString());
+        for (Map.Entry<WebSocket, String> e : clients.snapshot().entrySet()) {
+            WebSocket conn = e.getKey();
+            sendSafe(conn, json.toString());
+        }
+
+    }
 
     private void broadcastStatus() {
 
@@ -321,8 +338,8 @@ public class Main extends WebSocketServer {
             try {
                 // Opcional: si no hi ha clients, evita enviar
                 if (clients.snapshot().size()>1) {
-                    
                     broadcastStatus();
+                    broadcastRoundCountdown();
                 }
 
                 
@@ -362,7 +379,7 @@ public class Main extends WebSocketServer {
 
 
     /** Envia un missatge a tots els clients excepte l'emissor. */
-    private void broadcastExcept(WebSocket sender, String payload) {
+    public void broadcastExcept(WebSocket sender, String payload) {
         //System.out.println(payload);
         for (Map.Entry<WebSocket, String> e : clients.snapshot().entrySet()) {
             WebSocket conn = e.getKey();
@@ -375,24 +392,14 @@ public class Main extends WebSocketServer {
     private void sendCountdown() {
 
 
-
         synchronized (this) {
 
             
             if (countdownRunning) return;
-
-
-            int raspberryCount = 0;
-
-            if(clients.socketByName("raspberryClient")!=null){
-                raspberryCount++;
-            }
-
-
             
             //System.out.println("countdown iniciado!");
 
-            if (clients.snapshot().size()-raspberryCount != Missatges.REQUIRED_CLIENTS) return;
+            if (clientsData.size() < Missatges.REQUIRED_CLIENTS) return;
 
             //System.out.println("paso el return");
 
@@ -402,7 +409,7 @@ public class Main extends WebSocketServer {
         new Thread(() -> {
             try {
 
-                gameData.restartGame();
+                gameData.restartGameData();
 
                 JSONObject json= msg(Missatges.K_TYPE)
                 .put(Missatges.K_TYPE, Missatges.INIT_COUNT_DOWN);
@@ -452,6 +459,16 @@ public class Main extends WebSocketServer {
                 countdownRunning = false;
             }
         }, "CountdownThread").start();
+    }
+
+    private void onGameEnd(String winnerName) {
+        clientsData.clear();
+        
+        System.out.println("clientsData size:" + clientsData.size());
+
+        JSONObject msg = msg(Missatges.T_WINNER)
+            .put(Missatges.K_VALUE, winnerName);
+        broadcastExcept(null, msg.toString());
     }
 
 }

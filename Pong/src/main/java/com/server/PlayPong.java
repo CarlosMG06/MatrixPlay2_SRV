@@ -12,11 +12,18 @@ import java.util.concurrent.TimeUnit;
 
 import org.json.JSONObject;
 
+interface GameEndListener {
+    void onGameEnd(String winnerName);
+}
+
 public class PlayPong {
 
     private enum states{ 
         WAITING_START , ROUND_RUNNING , ROUND_END
     }
+
+    private boolean roundCountdownRunning = false;
+    private int countDown=0;
 
 
     private int playersReady = 0;
@@ -30,6 +37,7 @@ public class PlayPong {
 
     private String p1Name;
     private String p2Name;
+    private String winnerName;
 
 
     private int recHeight;
@@ -53,11 +61,17 @@ public class PlayPong {
     private double ballXDouble;
     private double ballYDouble;
 
-    private double angle;
+    private double speedY;
 
-    private double speed;
+    private double speedX;
 
     private double screenSize;
+
+    private GameEndListener gameEndListener;
+
+    public void setGameEndListener(GameEndListener listener) {
+        this.gameEndListener = listener;
+    }
 
     public void closeGame(){
         game.shutdownNow();
@@ -104,45 +118,15 @@ public class PlayPong {
         playerInputs.add(new Input(player, input));
     }
 
-    
-
-    public PlayPong(String p1Name, String p2Name){
-
-        this.p1Name=p1Name;
-        this.p2Name=p2Name;
-
-
-
-        recHeight = 16;
-        recWitdh = 3;
-
-        
-        p1possY=32;
-        p2possY=32;
-
-        p1possX=0;
-        p2possX=61;
-
-        p1Points=0;
-        p2Points=0;
-
-        ballX=32;
-        ballY=32;
-        ballSize = 2;
-
-        ballXDouble=32f;
-        ballYDouble=32f;
-
-        angle=1;
-        speed=2;
-        
-        screenSize = 64;
-
+    public PlayPong(){
+        restartGameData();
     }
 
-    public void restartGame(){
+    public void restartGameData(){
         this.p1Name="";
         this.p2Name="";
+        this.winnerName="";
+        gameState= states.WAITING_START;
 
         recHeight = 16;
         recWitdh = 3;
@@ -163,89 +147,64 @@ public class PlayPong {
         ballXDouble = 32f;
         ballYDouble = 32f;
 
-        angle=0.7;
-        speed=1;
+        speedY=0.7;
+        speedX=1;
         
         screenSize = 64;
 
         playersReady= 0;
     }
 
-    public PlayPong(){
-        restartGame();
+    public void roundCountDown(){
+        if(roundCountdownRunning){return;}
+
+        roundCountdownRunning = true;
+        new Thread(() -> {
+            try {
+
+                for (int i = 3; i > -1; i--) {
+                    countDown= i;
+                    System.out.println(i);
+                    if (i > -1) Thread.sleep(750); // ritme del compte enrere
+                }
+
+            } catch (InterruptedException ie) {
+                System.out.println("Error en conteo");
+                Thread.currentThread().interrupt();
+            } finally {
+
+                System.out.println("Acabo la cuenta");
+                gameState=states.ROUND_RUNNING;
+                roundCountdownRunning = false;
+                
+            }
+        }, "roundCountDown").start();
     }
-
-    // public void gameCountDown(){
-    //     countdownRunning = true;
-        
-    //     new Thread(() -> {
-    //         try {
-
-    //             JSONObject json= msg(Missatges.K_TYPE)
-    //             .put(Missatges.K_TYPE, Missatges.INIT_COUNT_DOWN);
-
-    //             broadcastExcept(null,json.toString());
-
-
-    //             Thread.sleep(750);
-
-    //             JSONObject jo = new JSONObject();
-    //             int num = 1;
-
-    //             for(String name : clientsData.keySet()){
-                    
-    //                 if(name.equals("raspberryClient")) { continue;}
-
-    //                 System.out.println("agregando :"+name+" al countdown");
-
-    //                 jo.put("player"+num, name);
-    //                 num++;
-    //             }
-
-
-
-    //             for (int i = 5; i >= 0; i--) {
-    //                 int raspberryCount = 0;
-
-    //                 if(clients.socketByName("raspberryClient")!=null){
-    //                     raspberryCount++;
-    //                 }
-    //                 // Si durant el compte enrere ja no hi ha els clients requerits, cancel·la
-    //                 if (clients.snapshot().size()-raspberryCount < Missatges.REQUIRED_CLIENTS) {
-    //                     System.out.println("se cerro XD");
-    //                     break;
-    //                 }
-    //                 jo.put("msgCountDown", i);
-
-    //                 sendCountdownToAll(jo);
-
-    //                 if (i > 0) Thread.sleep(750); // ritme del compte enrere
-    //             }
-    //         } catch (InterruptedException ie) {
-    //             Thread.currentThread().interrupt();
-    //         } finally {
-    //             countdownRunning = false;
-    //         }
-    //     }, "CountdownThread").start();
-    // }
 
     public boolean isPlayer(WebSocket conn,String name){
 
         return name.equals(p1Name) || name.equals(p2Name);
     }
 
+    public boolean isRoundCountdownRunning(){
+        return roundCountdownRunning;
+    }
+    public int getCountDown(){
+        return countDown;
+    }
+
 
     public void tick(long ms){
+        processPlayersInputs();
         switch (gameState) {
             case WAITING_START:
                 
-                gameState= states.ROUND_RUNNING;
-                //gameCountDown();
+                //gameState= states.ROUND_RUNNING;
+                roundCountDown();
                 break;
             
             case ROUND_RUNNING:
 
-                processPlayersInputs();
                 updateGame(ms);
                 checkGoal();
 
@@ -267,13 +226,28 @@ public class PlayPong {
     }
 
     public void nextRound(){
+
+
         ballXDouble=32f;
         ballX= 32;
-        ballY=((int) (Math.random()*40))+10;
-        ballYDouble=(long)ballY;
-
-        speed=1f;
         
+
+
+        int random =(int)(Math.random()*2)+1;
+        if(random==1){
+            ballY=0;
+        }else{
+            ballY=62;
+        }
+
+        ballYDouble=(double)ballY;
+        
+        random =(int)(Math.random()*2)+1;
+        if(random==1){
+            speedX=1f;
+        }else{
+            speedX=-1f;
+        }
         gameState= states.WAITING_START;
     }
 
@@ -295,9 +269,9 @@ public class PlayPong {
             }
             
             else{
-            //segundo player
-            p2possY=input.getPossY();
-            Main.clientsData.get(p2Name).poss=p2possY;
+                //segundo player
+                p2possY=input.getPossY();
+                Main.clientsData.get(p2Name).poss=p2possY;
             }
             
             
@@ -325,7 +299,7 @@ public class PlayPong {
     }
 
     public boolean colisionArribaAbajo(){
-        return ballY==0 || ballY+ballSize == screenSize-1;
+        return ballY<=0 || ballY+ballSize >= screenSize-1;
     }
 
     public boolean colisionDerechaIzquiedaWithRect(){
@@ -360,27 +334,37 @@ public class PlayPong {
 
     public void updateGame(long ms){
 
-        ballXDouble += speed * (ms / 80.0);
+        ballXDouble += speedX * (ms / 80.0);
         ballX= (int) ballXDouble;
 
-        ballYDouble += angle * (ms / 80.0);
+        ballYDouble += speedY * (ms / 80.0);
         ballY= (int) ballYDouble;
 
         if(colisionPlayers()){
             //System.out.println("XrebotoX X="+ballX+"  Y="+ballY);
-            speed*=-1;
+            speedX*=-1;
 
             if(ballX<32){
-                speed+=0.1;
+                ballXDouble=(double)(recWitdh+1);
+                speedX+=0.1;
             }else{
-                speed-=0.1;
+                ballXDouble=(double)(screenSize-recWitdh-ballSize);
+                speedX-=0.1;
             }
         }
 
         if(colisionArribaAbajo()){
             //System.out.println("YrebotoY X="+ballX+"  Y="+ballY);
-            angle*=-1;
+            speedY*=-1;
+            if(ballY<32){
+                ballYDouble=1f;
+            }else{
+                ballYDouble=61f;
+            }
         }
+
+        
+
 
     }
 
@@ -392,8 +376,8 @@ public class PlayPong {
         obj.put("p2PossY", p2possY);
         obj.put("p1Points", p1Points);
         obj.put("p2Points", p2Points);
-        obj.put("ballX", ballX);
-        obj.put("ballY", ballY);
+        obj.put("ballX", ballXDouble);
+        obj.put("ballY", ballYDouble);
         return obj;
     }
 
@@ -409,12 +393,13 @@ public class PlayPong {
     }
 
     private boolean checkWinner(){
-        
         if(p1Points>=Missatges.REQUIRED_POINTS_TO_WIN){
-            UtilsLog.info(p1Name+" gano el juego"); 
+            UtilsLog.info(p1Name+" gano el juego");
+            winnerName = p1Name;
             return true;}
         if(p2Points>=Missatges.REQUIRED_POINTS_TO_WIN){
             UtilsLog.info(p2Name+" gano el juego"); 
+            winnerName = p2Name;
             return true;}
         return false;
     }
@@ -432,7 +417,9 @@ public class PlayPong {
                 //System.out.println("X: "+ballX+" Y:"+ballY);
                 if(checkWinner()){
                     UtilsLog.info("Juego acabado");
+                    gameEndListener.onGameEnd(winnerName);
                     game.close();
+                    stopGame();
                 }
 
             } catch (Exception e) {
