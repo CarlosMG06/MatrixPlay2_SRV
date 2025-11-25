@@ -169,6 +169,12 @@ public class Main extends WebSocketServer {
                     gameData.startGame();
                 }
                 break;
+                
+
+            case Missatges.C_EXIT :
+                String name = clients.remove(conn);
+                clientsData.remove(name);
+                break;
 
 
             case Missatges.C_MOVE :
