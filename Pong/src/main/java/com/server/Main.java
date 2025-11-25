@@ -202,6 +202,21 @@ public class Main extends WebSocketServer {
         config.put("url", "wss://matrixplay2.ieti.site:443");
         sendSafe(rpi, config.toString());
     }
+    private void sendGameEventToRaspberry(String event, JSONObject extra) {
+        WebSocket rpi = clients.socketByName("raspberryClient");
+        if (rpi == null) return;
+
+        JSONObject msg = new JSONObject();
+        msg.put("type", "jocData");
+        msg.put("estatPartida", event);
+        if (extra != null) {
+            for(String key : extra.keySet()) {
+                msg.put(key, extra.get(key));
+            }
+        }
+        sendSafe(rpi, msg.toString());
+    }
+
 
 
     /** Envía un mensaje de texto a **todos los clientes**, incluyendo Raspberry */
