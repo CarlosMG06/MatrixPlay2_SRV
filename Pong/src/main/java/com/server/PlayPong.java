@@ -12,6 +12,10 @@ import java.util.concurrent.TimeUnit;
 
 import org.json.JSONObject;
 
+interface GameEndListener {
+    void onGameEnd(String winnerName);
+}
+
 public class PlayPong {
 
     private enum states{ 
@@ -33,6 +37,7 @@ public class PlayPong {
 
     private String p1Name;
     private String p2Name;
+    private String winnerName;
 
 
     private int recHeight;
@@ -61,6 +66,12 @@ public class PlayPong {
     private double speedX;
 
     private double screenSize;
+
+    private GameEndListener gameEndListener;
+
+    public void setGameEndListener(GameEndListener listener) {
+        this.gameEndListener = listener;
+    }
 
     public void closeGame(){
         game.shutdownNow();
@@ -107,45 +118,15 @@ public class PlayPong {
         playerInputs.add(new Input(player, input));
     }
 
-    
-
-    public PlayPong(String p1Name, String p2Name){
-
-        this.p1Name=p1Name;
-        this.p2Name=p2Name;
-
-
-
-        recHeight = 16;
-        recWitdh = 3;
-
-        
-        p1possY=32;
-        p2possY=32;
-
-        p1possX=0;
-        p2possX=61;
-
-        p1Points=0;
-        p2Points=0;
-
-        ballX=32;
-        ballY=32;
-        ballSize = 2;
-
-        ballXDouble=32f;
-        ballYDouble=32f;
-
-        speedY=1;
-        speedX=2;
-        
-        screenSize = 64;
-
+    public PlayPong(){
+        restartGameData();
     }
 
-    public void restartGame(){
+    public void restartGameData(){
         this.p1Name="";
         this.p2Name="";
+        this.winnerName="";
+        gameState= states.WAITING_START;
 
         recHeight = 16;
         recWitdh = 3;
@@ -172,10 +153,6 @@ public class PlayPong {
         screenSize = 64;
 
         playersReady= 0;
-    }
-
-    public PlayPong(){
-        restartGame();
     }
 
     public void roundCountDown(){
@@ -292,9 +269,9 @@ public class PlayPong {
             }
             
             else{
-            //segundo player
-            p2possY=input.getPossY();
-            Main.clientsData.get(p2Name).poss=p2possY;
+                //segundo player
+                p2possY=input.getPossY();
+                Main.clientsData.get(p2Name).poss=p2possY;
             }
             
             
@@ -416,12 +393,13 @@ public class PlayPong {
     }
 
     private boolean checkWinner(){
-        
         if(p1Points>=Missatges.REQUIRED_POINTS_TO_WIN){
-            UtilsLog.info(p1Name+" gano el juego"); 
+            UtilsLog.info(p1Name+" gano el juego");
+            winnerName = p1Name;
             return true;}
         if(p2Points>=Missatges.REQUIRED_POINTS_TO_WIN){
             UtilsLog.info(p2Name+" gano el juego"); 
+            winnerName = p2Name;
             return true;}
         return false;
     }
@@ -439,7 +417,9 @@ public class PlayPong {
                 //System.out.println("X: "+ballX+" Y:"+ballY);
                 if(checkWinner()){
                     UtilsLog.info("Juego acabado");
+                    gameEndListener.onGameEnd(winnerName);
                     game.close();
+                    stopGame();
                 }
 
             } catch (Exception e) {

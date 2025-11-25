@@ -51,9 +51,9 @@ public class Missatges {
     public static final String K_NAME_AVAILABLE = "NameAvailable";
     public static final String K_NAME_USED = "NameUsed";
 
+    public static final String T_WINNER = "winner";
 
-
-
+    public static final String C_PLAY_AGAIN = "playAgain";
 
     /** Freqüència d’enviament de l’estat (frames per segon). */
     public static final int SEND_FPS = 30;
