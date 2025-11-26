@@ -305,7 +305,7 @@ public class PlayPong {
     }
 
     public boolean colisionDerechaIzquiedaWithRect(){
-        return ballX<recWitdh+1 || ballX+ballSize> screenSize-recWitdh-1;
+        return ballX<recWitdh || ballX+ballSize> screenSize-recWitdh-1;
     }
 
 
